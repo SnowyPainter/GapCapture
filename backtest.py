@@ -1,6 +1,7 @@
 import stockdata
 import tensorflow as tf
 import numpy as np 
+import math
 
 def reshape(state):
     return np.reshape(state, [1, 1, 2])
@@ -49,7 +50,7 @@ class Strategy1:
                         self.symbol2_balance += self.symbol2_units * prices[1]
                         self.symbol2_units -= self.symbol2_units
                         self.trades += 1
-                    symbol1_amount = int(self.symbol1_balance / prices[0])
+                    symbol1_amount = math.floor(self.symbol1_balance / prices[0])
                     if symbol1_amount > 0:
                         self.symbol1_balance -= symbol1_amount * prices[0] + symbol1_amount * self.fee
                         self.symbol1_units += symbol1_amount
@@ -59,7 +60,7 @@ class Strategy1:
                         self.symbol1_balance += self.symbol1_units * prices[0]
                         self.symbol1_units -= self.symbol1_units
                         self.trades += 1
-                    symbol2_amount = int(self.symbol2_balance / prices[1])
+                    symbol2_amount = math.floor(self.symbol2_balance / prices[1])
                     if symbol2_amount > 0:
                         self.symbol2_balance -= symbol2_amount * prices[1] + symbol2_amount * self.fee
                         self.symbol2_units += symbol2_amount
