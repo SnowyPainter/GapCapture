@@ -1,3 +1,4 @@
 KEYS.py
 __pycache__
 *.keras
+*.dat

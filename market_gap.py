@@ -1,9 +1,13 @@
 import stockdata, learn
 import backtest
+import numpy as np
 import matplotlib.pyplot as plt
 
 tickers = ["nvda", "000660.KS"]
 env = learn.MarketEnvironment("nvda", "000660.KS", stockdata.today_before(180), stockdata.today(),"1d")
+
+def reshape(state):
+    return np.reshape(state, [1, 1, 2])
 
 def learn():
     agent = learn.DQNAgent(env, 10000, 64)
