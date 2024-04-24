@@ -28,9 +28,7 @@ class Strategy1:
         
         self.net_wealths = list()
         bar = 1
-        
-        self.symbol1_balance = self.amount / 2
-        self.symbol2_balance = self.amount / 2
+        self.current_balance = self.amount
         self.symbol1_units = 0
         self.symbol2_units = 0
         
@@ -47,26 +45,28 @@ class Strategy1:
             if action != 0:
                 if action == 1:
                     if self.symbol2_units > 0:
-                        self.symbol2_balance += self.symbol2_units * prices[1]
+                        self.current_balance += self.symbol2_units * prices[1]
                         self.symbol2_units -= self.symbol2_units
                         self.trades += 1
-                    symbol1_amount = math.floor(self.symbol1_balance / prices[0])
+                    symbol1_amount = math.floor(self.current_balance / prices[0])
                     if symbol1_amount > 0:
-                        self.symbol1_balance -= symbol1_amount * prices[0] + symbol1_amount * self.fee
+                        self.current_balance += self.symbol2_units * prices[1]
+                        self.current_balance -= symbol1_amount * prices[0] + symbol1_amount * self.fee
                         self.symbol1_units += symbol1_amount
                         self.trades += 1
                 elif action == 2:
                     if self.symbol1_units > 0:
-                        self.symbol1_balance += self.symbol1_units * prices[0]
+                        self.current_balance += self.symbol1_units * prices[0]
                         self.symbol1_units -= self.symbol1_units
                         self.trades += 1
-                    symbol2_amount = math.floor(self.symbol2_balance / prices[1])
+                    symbol2_amount = math.floor(self.current_balance / prices[1])
                     if symbol2_amount > 0:
-                        self.symbol2_balance -= symbol2_amount * prices[1] + symbol2_amount * self.fee
+                        self.current_balance += self.symbol1_units * prices[0]
+                        self.current_balance -= symbol2_amount * prices[1] + symbol2_amount * self.fee
                         self.symbol2_units += symbol2_amount
                         self.trades += 1
             
-            self.net_wealths.append(self.symbol1_units * prices[0] + self.symbol2_units * prices[1] + self.symbol1_balance + self.symbol2_balance)
+            self.net_wealths.append(self.symbol1_units * prices[0] + self.symbol2_units * prices[1] + self.current_balance)
             self.units = self.symbol1_units + self.symbol2_units
     
             bar += 1

@@ -83,29 +83,34 @@ while time.time() < timeout_start + timeout:
         if action == 1:
             if symbol2_units > 0:
                 sell_order(symbols[1], symbol2_units)
-                current_amount += symbol2_units * prices[1]
+                current_amount += symbol2_units * symbol2_price
                 symbol2_units -= symbol2_units
                 trades += 1
-            symbol1_amount = math.floor(current_amount / prices[0])
+            symbol1_amount = math.floor(current_amount / symbol1_price)
             if symbol1_amount > 0:
+                sell_order(symbols[1], symbol2_units)
+                current_amount += symbol2_units * symbol2_price
                 buy_order(symbols[0], symbol1_amount)
-                current_amount -= symbol1_amount * prices[0] + symbol1_amount * fee
+                current_amount -= symbol1_amount * symbol1_price + symbol1_amount * fee
                 symbol1_units += symbol1_amount
                 trades += 1
         elif action == 2:
             if symbol1_units > 0:
                 sell_order(symbols[0], symbol1_units)
-                current_amount += symbol1_units * prices[0]
+                current_amount += symbol1_units * symbol1_price
                 symbol1_units -= symbol1_units
                 trades += 1
-            symbol2_amount = math.floor(current_amount / prices[1])
+            symbol2_amount = math.floor(current_amount / symbol2_price)
             if symbol2_amount > 0:
+                sell_order(symbols[0], symbol1_units)
+                current_amount += symbol1_units * symbol1_price
                 buy_order(symbols[1], symbol2_amount)
-                current_amount -= symbol2_amount * prices[1] + symbol2_amount * fee
+                current_amount -= symbol2_amount * symbol2_price + symbol2_amount * fee
                 symbol2_units += symbol2_amount
                 trades += 1
     net_wealths.append(symbol1_units * symbol1_price + symbol2_units * symbol2_price + current_amount)
     print(net_wealths[-1])
+    
     time.sleep(60*5)
     
 data = {

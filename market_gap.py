@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 tickers = ["042700.KS", "000660.KS"]
-env = learn.MarketEnvironment("042700.KS", "000660.KS", stockdata.today_before(50), stockdata.today(),"1d")
+env = learn.MarketEnvironment("042700.KS", "000660.KS", stockdata.today_before(180), stockdata.today(),"1d")
 
 def reshape(state):
     return np.reshape(state, [1, 1, 2])
