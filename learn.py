@@ -55,6 +55,8 @@ class MarketEnvironment:
     def _get_state(self):
         return self.normalized_data[self.features].iloc[self.bar-1:self.bar]
 
+    def get_last(self):
+        return self.normalized_data[self.features].iloc[-1]
     def get_state(self, bar):
         return self.normalized_data[self.features].iloc[bar-1:bar]
     

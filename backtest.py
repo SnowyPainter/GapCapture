@@ -8,7 +8,7 @@ def reshape(state):
 
 class Strategy1:
     def __init__(self, env, amount, fee):
-        self.agent = tf.keras.models.load_model("nvdask.keras")
+        self.agent = tf.keras.models.load_model("hmsk.keras")
         self.env = env
         self.amount = amount
         self.fee = fee

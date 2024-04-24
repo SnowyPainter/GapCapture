@@ -3,16 +3,16 @@ import backtest
 import numpy as np
 import matplotlib.pyplot as plt
 
-tickers = ["nvda", "000660.KS"]
-env = learn.MarketEnvironment("nvda", "000660.KS", stockdata.today_before(180), stockdata.today(),"1d")
+tickers = ["042700.KS", "000660.KS"]
+env = learn.MarketEnvironment("042700.KS", "000660.KS", stockdata.today_before(50), stockdata.today(),"1d")
 
 def reshape(state):
     return np.reshape(state, [1, 1, 2])
 
-def learn():
+def l():
     agent = learn.DQNAgent(env, 10000, 64)
     agent.learn(30)
-    agent.save("./nvdask.keras")
+    agent.save("./hmsk.keras")
 
 def bt():
     amount = 10000
