@@ -88,8 +88,10 @@ while time.time() < timeout_start + timeout:
                 trades += 1
             symbol1_amount = math.floor(current_amount / symbol1_price)
             if symbol1_amount > 0:
-                sell_order(symbols[1], symbol2_units)
-                current_amount += symbol2_units * symbol2_price
+                if symbol2_units > 0:
+                    sell_order(symbols[1], symbol2_units)
+                    current_amount += symbol2_units * symbol2_price
+                    symbol2_units -= symbol2_units
                 buy_order(symbols[0], symbol1_amount)
                 current_amount -= symbol1_amount * symbol1_price + symbol1_amount * fee
                 symbol1_units += symbol1_amount
@@ -102,8 +104,10 @@ while time.time() < timeout_start + timeout:
                 trades += 1
             symbol2_amount = math.floor(current_amount / symbol2_price)
             if symbol2_amount > 0:
-                sell_order(symbols[0], symbol1_units)
-                current_amount += symbol1_units * symbol1_price
+                if symbol1_units > 0:
+                    sell_order(symbols[0], symbol1_units)
+                    current_amount += symbol1_units * symbol1_price
+                    symbol1_units -= symbol1_units
                 buy_order(symbols[1], symbol2_amount)
                 current_amount -= symbol2_amount * symbol2_price + symbol2_amount * fee
                 symbol2_units += symbol2_amount
