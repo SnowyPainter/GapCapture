@@ -79,9 +79,12 @@ while time.time() < timeout_start + timeout:
     symbol2_price = prices.iloc[0][1]
     
     action = np.argmax(agent.predict(state, verbose=0)[0, 0])
-    if action != 0:
+    if action == 0:
+        print(stockdata.today(), "Holding")
+    else:
         if action == 1:
             if symbol2_units > 0:
+                print(f"SOLD : {symbols[1]} - {symbol2_units} / {symbol2_price}")
                 sell_order(symbols[1], symbol2_units)
                 current_amount += symbol2_units * symbol2_price
                 symbol2_units -= symbol2_units
@@ -89,15 +92,18 @@ while time.time() < timeout_start + timeout:
             symbol1_amount = math.floor(current_amount / symbol1_price)
             if symbol1_amount > 0:
                 if symbol2_units > 0:
+                    print(f"SOLD : {symbols[1]} - {symbol2_units} / {symbol2_price}")
                     sell_order(symbols[1], symbol2_units)
                     current_amount += symbol2_units * symbol2_price
                     symbol2_units -= symbol2_units
+                print(f"BUY : {symbols[0]} - {symbol1_amount} / {symbol1_price}")
                 buy_order(symbols[0], symbol1_amount)
                 current_amount -= symbol1_amount * symbol1_price + symbol1_amount * fee
                 symbol1_units += symbol1_amount
                 trades += 1
         elif action == 2:
             if symbol1_units > 0:
+                print(f"SOLD : {symbols[0]} - {symbol1_amount} / {symbol1_price}")
                 sell_order(symbols[0], symbol1_units)
                 current_amount += symbol1_units * symbol1_price
                 symbol1_units -= symbol1_units
@@ -105,9 +111,11 @@ while time.time() < timeout_start + timeout:
             symbol2_amount = math.floor(current_amount / symbol2_price)
             if symbol2_amount > 0:
                 if symbol1_units > 0:
+                    print(f"SOLD : {symbols[0]} - {symbol1_amount} / {symbol1_price}")
                     sell_order(symbols[0], symbol1_units)
                     current_amount += symbol1_units * symbol1_price
                     symbol1_units -= symbol1_units
+                print(f"BUY : {symbols[1]} - {symbol2_amount} / {symbol2_price}")
                 buy_order(symbols[1], symbol2_amount)
                 current_amount -= symbol2_amount * symbol2_price + symbol2_amount * fee
                 symbol2_units += symbol2_amount
