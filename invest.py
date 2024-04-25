@@ -11,9 +11,6 @@ import pandas as pd
 
 from KEYS import *
 
-#time.sleep(60*60 + 60*30)
-#print("Start Trade")
-
 def buy_order(symbol, qty): #market price
     resp = broker.create_market_buy_order(
         symbol=symbol,
@@ -63,6 +60,11 @@ print(f"평가 : {resp['output2'][0]['tot_evlu_amt']}")
 print(f"예수금 : {current_amount}")
 print(f"보유 종목 : {stocks_qty}")
 
+h = 60*60 + 60*30
+print(f"{h/3600} 시간 후에 시작")
+time.sleep(h)
+print("인공지능 매매 시작")
+
 trades = 0
 fee = 0.005
 net_wealths = list()
@@ -79,6 +81,7 @@ while time.time() < timeout_start + timeout:
     symbol2_price = prices.iloc[0][1]
     
     action = np.argmax(agent.predict(state, verbose=0)[0, 0])
+    print(f"ACTION : {action}")
     if action == 0:
         print(stockdata.today(), "Holding")
     else:
