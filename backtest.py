@@ -14,6 +14,7 @@ class Strategy1:
     def _buy(self, units, price):
         self.current_balance -= units * price + units * self.fee
         self.trades += 1
+        return units
     
     def __init__(self, env, amount, fee):
         self.agent = tf.keras.models.load_model("hmsk.keras")
@@ -56,17 +57,12 @@ class Strategy1:
                         self.symbol2_units -= self._sell(self.symbol2_units, prices[1])
                     symbol1_amount = math.floor(self.current_balance / prices[0])
                     if symbol1_amount > 0:
-                        #청산 후 매수
-                        self.symbol2_units -= self._sell(self.symbol2_units, prices[1])
                         self.symbol1_units += self._buy(symbol1_amount, prices[0])
-                        self.trades += 1
                 elif action == 2:
                     if self.symbol1_units > 0:
                         self.symbol1_units -= self._sell(self.symbol1_units, prices[0])
                     symbol2_amount = math.floor(self.current_balance / prices[1])
                     if symbol2_amount > 0:
-                        #청산 후 매수
-                        self.symbol1_units -= self._sell(self.symbol1_units, prices[0])
                         self.symbol2_units += self._buy(symbol2_amount, prices[1])
             
             self.net_wealths.append(self.symbol1_units * prices[0] + self.symbol2_units * prices[1] + self.current_balance)

@@ -20,14 +20,14 @@ def buy_order(symbol, qty): #market price
         quantity=qty
     )
     pprint.pprint(resp)
-    time.sleep(10)
+    time.sleep(1)
 def sell_order(symbol, qty):
     resp = broker.create_market_sell_order(
         symbol=symbol,
         quantity=qty
     )
     pprint.pprint(resp)
-    time.sleep(10)
+    time.sleep(1)
 
 def get_price(symbol):
     resp = broker.fetch_price(symbol)
@@ -91,11 +91,6 @@ while time.time() < timeout_start + timeout:
                 trades += 1
             symbol1_amount = math.floor(current_amount / symbol1_price)
             if symbol1_amount > 0:
-                if symbol2_units > 0:
-                    print(f"SOLD : {symbols[1]} - {symbol2_units} / {symbol2_price}")
-                    sell_order(symbols[1], symbol2_units)
-                    current_amount += symbol2_units * symbol2_price
-                    symbol2_units -= symbol2_units
                 print(f"BUY : {symbols[0]} - {symbol1_amount} / {symbol1_price}")
                 buy_order(symbols[0], symbol1_amount)
                 current_amount -= symbol1_amount * symbol1_price + symbol1_amount * fee
@@ -110,11 +105,6 @@ while time.time() < timeout_start + timeout:
                 trades += 1
             symbol2_amount = math.floor(current_amount / symbol2_price)
             if symbol2_amount > 0:
-                if symbol1_units > 0:
-                    print(f"SOLD : {symbols[0]} - {symbol1_amount} / {symbol1_price}")
-                    sell_order(symbols[0], symbol1_units)
-                    current_amount += symbol1_units * symbol1_price
-                    symbol1_units -= symbol1_units
                 print(f"BUY : {symbols[1]} - {symbol2_amount} / {symbol2_price}")
                 buy_order(symbols[1], symbol2_amount)
                 current_amount -= symbol2_amount * symbol2_price + symbol2_amount * fee
