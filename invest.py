@@ -47,7 +47,7 @@ agent = tf.keras.models.load_model("hmsk.keras")
 resp = broker.fetch_balance()
 current_amount = int(resp['output2'][0]['prvs_rcdl_excc_amt'])
 symbols = ["042700", "000660"] #hanmi semiconductor / sk hynix
-env = learn.MarketEnvironment(symbols[0]+".KS", symbols[1]+".KS", stockdata.today_before(50), stockdata.today(),"30m")
+env = learn.MarketEnvironment(symbols[0]+".KS", symbols[1]+".KS", stockdata.today_before(14), stockdata.today(),"30m")
 
 stocks_qty = {}
 for stock in resp['output1']:
@@ -60,7 +60,7 @@ print(f"평가 : {resp['output2'][0]['tot_evlu_amt']}")
 print(f"예수금 : {current_amount}")
 print(f"보유 종목 : {stocks_qty}")
 
-h = 60*60 + 60*30
+h = 60*60*1.5
 print(f"{h/3600} 시간 후에 시작")
 time.sleep(h)
 print("인공지능 매매 시작")
@@ -76,11 +76,11 @@ while time.time() < timeout_start + timeout:
     prices = create_prices(symbols[0], symbols[1])
     env.append_raw(prices)
     state = reshape(np.array([env.get_last()]))
-    
     symbol1_price = prices.iloc[0][0]
     symbol2_price = prices.iloc[0][1]
     
     action = np.argmax(agent.predict(state, verbose=0)[0, 0])
+    print(state)
     print(f"ACTION : {action}")
     if action == 0:
         print(stockdata.today(), "Holding")
@@ -117,11 +117,5 @@ while time.time() < timeout_start + timeout:
     print(net_wealths[-1])
     
     time.sleep(60*5)
-    
-data = {
-    "trades" : trades,
-    "net wealths" : net_wealths
-}
 
-with open(f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M")}.json', 'w') as f:
-    json.dump(data, f)
+print(f"Day trade end {trades}")

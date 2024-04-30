@@ -39,6 +39,7 @@ class MarketEnvironment:
     def _normalize(self):
         mean, std = self.raw.mean(), self.raw.std()
         self.normalized_data = (self.raw - mean) / std
+        print(self.raw)
     def _determin_to_trade(self, bar, threshold):
         diff = self.normalized_data[self.symbols[0]+"_Price"].iloc[bar] - self.normalized_data[self.symbols[1]+"_Price"].iloc[bar]
         diff = (1 if diff < 0 else (2 if diff > 0 else 0)) if abs(diff) >= threshold else 0
@@ -67,14 +68,14 @@ class MarketEnvironment:
         return state.values
     
     def append_raw(self, df):
-        self.raw.append(df)
+        self.raw = pd.concat([self.raw, df])
         self._normalize()
         
     def corr(self):
         return self.normalized_data.corr()
     
     def step(self, action):
-        correct = action == self._determin_to_trade(self.bar - 1, 0.3)
+        correct = action == self._determin_to_trade(self.bar - 1, 0.2)
         reward = 1 if correct else 0
         
         self.total_reward += reward

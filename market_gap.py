@@ -11,7 +11,7 @@ def reshape(state):
 
 def l():
     agent = learn.DQNAgent(env, 10000, 64)
-    agent.learn(30)
+    agent.learn(50)
     agent.save("./hmsk.keras")
 
 def bt():
@@ -22,4 +22,4 @@ def bt():
     plt.plot(stgy.net_wealths)
     plt.show()
 
-bt()
+l()
