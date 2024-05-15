@@ -11,6 +11,11 @@ import pandas as pd
 
 from KEYS import *
 
+def affordable_stocks(init_amount, stock_price, percent, affordables):
+    n = math.floor((init_amount * percent) / stock_price)
+    if n >= affordables:
+        n = affordables
+    return n
 def buy_order(symbol, qty): #market price
     resp = broker.create_market_buy_order(
         symbol=symbol,
@@ -63,6 +68,9 @@ net_wealths = list()
 start_time = datetime.time(9, 30)
 end_time = datetime.time(15, 30)
 
+init_amount = current_amount
+p = 0.1
+
 print(f"평가 : {resp['output2'][0]['tot_evlu_amt']}")
 print(f"예수금 : {current_amount}")
 print(f"보유 종목 : {stocks_qty}")
@@ -81,35 +89,40 @@ while True:
         else:
             if action == 1:
                 if symbol2_units > 0:
-                    print(f"SOLD : {symbols[1]} - {symbol2_units} / {symbol2_price}")
-                    sell_order(symbols[1], symbol2_units)
-                    current_amount += symbol2_units * symbol2_price
-                    symbol2_units -= symbol2_units
+                    units = affordable_stocks(init_amount, symbol2_price, p, symbol2_units)
+                    print(f"SOLD : {symbols[1]} - {units} / {symbol2_price}")
+                    sell_order(symbols[1], units)
+                    current_amount += units * symbol2_price
+                    symbol2_units -= units
                     trades += 1
                 symbol1_amount = math.floor(current_amount / symbol1_price)
+                units = affordable_stocks(init_amount, symbol1_price, p, symbol1_amount)
                 if symbol1_amount > 0:
-                    print(f"BUY : {symbols[0]} - {symbol1_amount} / {symbol1_price}")
-                    buy_order(symbols[0], symbol1_amount)
-                    current_amount -= symbol1_amount * symbol1_price + symbol1_amount * fee
-                    symbol1_units += symbol1_amount
+                    print(f"BUY : {symbols[0]} - {units} / {symbol1_price}")
+                    buy_order(symbols[0], units)
+                    current_amount -= units * symbol1_price + units * fee
+                    symbol1_units += units
                     trades += 1
             elif action == 2:
                 if symbol1_units > 0:
-                    print(f"SOLD : {symbols[0]} - {symbol1_amount} / {symbol1_price}")
-                    sell_order(symbols[0], symbol1_units)
-                    current_amount += symbol1_units * symbol1_price
-                    symbol1_units -= symbol1_units
+                    units = affordable_stocks(init_amount, symbol1_price, p, symbol1_units)
+                    print(f"SOLD : {symbols[0]} - {units} / {symbol1_price}")
+                    sell_order(symbols[0], units)
+                    current_amount += units * symbol1_price
+                    symbol1_units -= units
                     trades += 1
                 symbol2_amount = math.floor(current_amount / symbol2_price)
+                units = affordable_stocks(init_amount, symbol2_price, p, symbol2_amount)
                 if symbol2_amount > 0:
-                    print(f"BUY : {symbols[1]} - {symbol2_amount} / {symbol2_price}")
-                    buy_order(symbols[1], symbol2_amount)
-                    current_amount -= symbol2_amount * symbol2_price + symbol2_amount * fee
-                    symbol2_units += symbol2_amount
+                    print(f"BUY : {symbols[1]} - {units} / {symbol2_price}")
+                    buy_order(symbols[1], units)
+                    current_amount -= units * symbol2_price + units * fee
+                    symbol2_units += units
                     trades += 1
         net_wealths.append(symbol1_units * symbol1_price + symbol2_units * symbol2_price + current_amount)
         time.sleep(60*5)
-    else:
+    
+    if current_time >= end_time:
         print(f"장 종료 : {trades}")
         print(net_wealths)
         break
