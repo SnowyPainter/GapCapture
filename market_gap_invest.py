@@ -2,7 +2,7 @@ import datetime
 import mojito
 import math
 import time
-import learn, stockdata
+import MarketGap.learn as learn, stockdata
 import numpy as np
 import pprint
 import tensorflow as tf
@@ -48,7 +48,7 @@ def reshape(state):
     return np.reshape(state, [1, 1, 2])
 
 broker = mojito.KoreaInvestment(api_key=KEY, api_secret=APISECRET, acc_no=ACCOUNT_NO, mock=True)
-agent = tf.keras.models.load_model("hmsk.keras")
+agent = tf.keras.models.load_model("./MarketGap/hmsk.keras")
 resp = broker.fetch_balance()
 current_amount = int(resp['output2'][0]['prvs_rcdl_excc_amt'])
 symbols = ["042700", "000660"] #hanmi semiconductor / sk hynix
