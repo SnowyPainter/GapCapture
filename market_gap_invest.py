@@ -65,7 +65,7 @@ trades = 0
 fee = 0.005
 net_wealths = list()
 
-start_time = datetime.time(9, 30)
+start_time = datetime.time(9, 0)
 end_time = datetime.time(15, 30)
 
 init_amount = current_amount
