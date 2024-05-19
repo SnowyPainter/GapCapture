@@ -47,7 +47,18 @@ def create_prices(symbol1, symbol2):
 def reshape(state):
     return np.reshape(state, [1, 1, 2])
 
-broker = mojito.KoreaInvestment(api_key=KEY, api_secret=APISECRET, acc_no=ACCOUNT_NO, mock=True)
+t = input("실전투자(y), 모의투자(n) : ")
+k = REAL_KEY
+s = REAL_APISECRET
+a = REAL_ACCOUNT_NO
+mock = False
+if t != "y":
+    k = KEY
+    s = APISECRET
+    a = ACCOUNT_NO
+    mock = True
+
+broker = mojito.KoreaInvestment(api_key=k, api_secret=s, acc_no=a, mock=mock)
 agent = tf.keras.models.load_model("./MarketGap/hmsk.keras")
 resp = broker.fetch_balance()
 current_amount = int(resp['output2'][0]['prvs_rcdl_excc_amt'])
