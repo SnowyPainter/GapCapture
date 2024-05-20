@@ -144,5 +144,5 @@ while True:
         time.sleep(60*5)
     
     if current_time >= end_time:
-        logger.log(f"장 종료, Trades : {trades}, Net_Wealths : {str(net_wealths[-1])}")
+        logger.log(f"장 종료, Trades : {trades}")
         break
