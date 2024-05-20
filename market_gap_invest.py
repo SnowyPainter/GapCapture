@@ -44,7 +44,7 @@ def create_prices(symbol1, symbol2):
     p2 = get_price(symbol2)
     df[symbol1+'.KS_Price'] = [p1]
     df[symbol2+'.KS_Price'] = [p2]
-    df['Datetime'] = [pd.to_datetime(stockdata.today(), format="%Y-%m-%d %H:%M:%S%z")]
+    df['Datetime'] = [pd.to_datetime(stockdata.today(tz='Asia/Seoul'), format="%Y-%m-%d %H:%M:%S%z")]
     df.set_index('Datetime', inplace=True)
     return df
 def reshape(state):
@@ -66,7 +66,7 @@ agent = tf.keras.models.load_model("./MarketGap/hmsk.keras")
 resp = broker.fetch_balance()
 current_amount = int(resp['output2'][0]['prvs_rcdl_excc_amt'])
 symbols = ["042700", "000660"] #hanmi semiconductor / sk hynix
-env = learn.MarketEnvironment(symbols[0]+".KS", symbols[1]+".KS", stockdata.today_before(14), stockdata.today(),"5m")
+env = learn.MarketEnvironment(symbols[0]+".KS", symbols[1]+".KS", stockdata.today_before(14, tz='Asia/Seoul'), stockdata.today(tz='Asia/Seoul'),"5m")
 
 stocks_qty = {}
 for stock in resp['output1']:
