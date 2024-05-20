@@ -10,6 +10,7 @@ import json
 import pandas as pd
 
 from KEYS import *
+import log
 
 def affordable_stocks(init_amount, stock_price, percent, affordables):
     n = math.floor((init_amount * percent) / stock_price)
@@ -63,7 +64,7 @@ agent = tf.keras.models.load_model("./MarketGap/hmsk.keras")
 resp = broker.fetch_balance()
 current_amount = int(resp['output2'][0]['prvs_rcdl_excc_amt'])
 symbols = ["042700", "000660"] #hanmi semiconductor / sk hynix
-env = learn.MarketEnvironment(symbols[0]+".KS", symbols[1]+".KS", stockdata.today_before(14), stockdata.today(),"30m")
+env = learn.MarketEnvironment(symbols[0]+".KS", symbols[1]+".KS", stockdata.today_before(14), stockdata.today(),"5m")
 
 stocks_qty = {}
 for stock in resp['output1']:
@@ -82,9 +83,12 @@ end_time = datetime.time(15, 30)
 init_amount = current_amount
 p = 0.1
 
-print(f"평가 : {resp['output2'][0]['tot_evlu_amt']}")
-print(f"예수금 : {current_amount}")
-print(f"보유 종목 : {stocks_qty}")
+logger = log.Logger("한미반도체, SK하이닉스")
+logger.log(f"평가 : {resp['output2'][0]['tot_evlu_amt']}")
+logger.log(f"예수금 : {current_amount}")
+logger.log(f"보유 종목 : {stocks_qty}")
+logger.log(f"1회 매매 주식 비율(자산에서) : {p}")
+
 while True:
     current_time = datetime.datetime.now().time()
     if start_time <= current_time <= end_time:
@@ -96,12 +100,12 @@ while True:
         
         action = np.argmax(agent.predict(state, verbose=0)[0, 0])
         if action == 0:
-            print(stockdata.today(), "Holding")
+            logger.log(f"{action} : Holding")
         else:
             if action == 1:
                 if symbol2_units > 0:
                     units = affordable_stocks(init_amount, symbol2_price, p, symbol2_units)
-                    print(f"SOLD : {symbols[1]} - {units} / {symbol2_price}")
+                    logger.log(f"{action} : SOLD {symbols[1]} - {units} / {symbol2_price}")
                     sell_order(symbols[1], units)
                     current_amount += units * symbol2_price
                     symbol2_units -= units
@@ -109,15 +113,17 @@ while True:
                 symbol1_amount = math.floor(current_amount / symbol1_price)
                 units = affordable_stocks(init_amount, symbol1_price, p, symbol1_amount)
                 if symbol1_amount > 0:
-                    print(f"BUY : {symbols[0]} - {units} / {symbol1_price}")
+                    logger.log(f"{action} : BUY {symbols[0]} - {units} / {symbol1_price}")
                     buy_order(symbols[0], units)
                     current_amount -= units * symbol1_price + units * fee
                     symbol1_units += units
                     trades += 1
+                else:
+                    logger.log(f"No Money to buy {symbols[0]} - {current_amount}")
             elif action == 2:
                 if symbol1_units > 0:
                     units = affordable_stocks(init_amount, symbol1_price, p, symbol1_units)
-                    print(f"SOLD : {symbols[0]} - {units} / {symbol1_price}")
+                    logger.log(f"{action} : SOLD {symbols[0]} - {units} / {symbol1_price}")
                     sell_order(symbols[0], units)
                     current_amount += units * symbol1_price
                     symbol1_units -= units
@@ -125,15 +131,16 @@ while True:
                 symbol2_amount = math.floor(current_amount / symbol2_price)
                 units = affordable_stocks(init_amount, symbol2_price, p, symbol2_amount)
                 if symbol2_amount > 0:
-                    print(f"BUY : {symbols[1]} - {units} / {symbol2_price}")
+                    logger.log(f"{action} : BUY {symbols[1]} - {units} / {symbol2_price}")
                     buy_order(symbols[1], units)
                     current_amount -= units * symbol2_price + units * fee
                     symbol2_units += units
                     trades += 1
+                else:
+                    logger.log(f"No Money to buy {symbols[1]} - {current_amount}")
         net_wealths.append(symbol1_units * symbol1_price + symbol2_units * symbol2_price + current_amount)
         time.sleep(60*5)
     
     if current_time >= end_time:
-        print(f"장 종료 : {trades}")
-        print(net_wealths)
+        logger.log(f"장 종료, Trades : {trades}, Net_Wealths : {str(net_wealths[-1])}")
         break
