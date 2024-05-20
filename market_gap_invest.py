@@ -12,10 +12,12 @@ import pandas as pd
 from KEYS import *
 import log
 
-def affordable_stocks(init_amount, stock_price, percent, affordables):
+def affordable_stocks(init_amount, current_amount,stock_price, percent, affordables):
     n = math.floor((init_amount * percent) / stock_price)
     if n >= affordables:
         n = affordables
+    if n == 0 and current_amount >= stock_price:
+        n = 1
     return n
 def buy_order(symbol, qty): #market price
     resp = broker.create_market_buy_order(
@@ -104,14 +106,14 @@ while True:
         else:
             if action == 1:
                 if symbol2_units > 0:
-                    units = affordable_stocks(init_amount, symbol2_price, p, symbol2_units)
+                    units = affordable_stocks(init_amount, current_amount, symbol2_price, p, symbol2_units)
                     logger.log(f"{action} : SOLD {symbols[1]} - {units} / {symbol2_price}")
                     sell_order(symbols[1], units)
                     current_amount += units * symbol2_price
                     symbol2_units -= units
                     trades += 1
                 symbol1_amount = math.floor(current_amount / symbol1_price)
-                units = affordable_stocks(init_amount, symbol1_price, p, symbol1_amount)
+                units = affordable_stocks(init_amount, current_amount, symbol1_price, p, symbol1_amount)
                 if symbol1_amount > 0:
                     logger.log(f"{action} : BUY {symbols[0]} - {units} / {symbol1_price}")
                     buy_order(symbols[0], units)
@@ -122,14 +124,14 @@ while True:
                     logger.log(f"No Money to buy {symbols[0]} - {current_amount}")
             elif action == 2:
                 if symbol1_units > 0:
-                    units = affordable_stocks(init_amount, symbol1_price, p, symbol1_units)
+                    units = affordable_stocks(init_amount, current_amount, symbol1_price, p, symbol1_units)
                     logger.log(f"{action} : SOLD {symbols[0]} - {units} / {symbol1_price}")
                     sell_order(symbols[0], units)
                     current_amount += units * symbol1_price
                     symbol1_units -= units
                     trades += 1
                 symbol2_amount = math.floor(current_amount / symbol2_price)
-                units = affordable_stocks(init_amount, symbol2_price, p, symbol2_amount)
+                units = affordable_stocks(init_amount, current_amount, symbol2_price, p, symbol2_amount)
                 if symbol2_amount > 0:
                     logger.log(f"{action} : BUY {symbols[1]} - {units} / {symbol2_price}")
                     buy_order(symbols[1], units)
