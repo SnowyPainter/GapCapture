@@ -39,7 +39,6 @@ class MarketEnvironment:
     def _normalize(self):
         mean, std = self.raw.mean(), self.raw.std()
         self.normalized_data = (self.raw - mean) / std
-        print(self.raw)
     def _determin_to_trade(self, bar, threshold):
         diff = self.normalized_data[self.symbols[0]+"_Price"].iloc[bar] - self.normalized_data[self.symbols[1]+"_Price"].iloc[bar]
         diff = (1 if diff < 0 else (2 if diff > 0 else 0)) if abs(diff) >= threshold else 0
