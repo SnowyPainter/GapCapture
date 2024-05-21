@@ -142,7 +142,9 @@ while True:
                     logger.log(f"No Money to buy {symbols[1]} - {current_amount}")
         net_wealths.append(symbol1_units * symbol1_price + symbol2_units * symbol2_price + current_amount)
         time.sleep(60*5)
-    
+    else:
+        time.sleep(60)
+        
     if current_time >= end_time:
         logger.log(f"장 종료, Trades : {trades}")
         break
