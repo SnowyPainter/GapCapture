@@ -1,26 +1,30 @@
 import backtest
 import stockdata
 import strategy
-import concurrent.futures
+import threading
 
 def calculate_profit(net_wealth, init_amount):
     return (net_wealth - init_amount) / init_amount
 
 sma_window = 14
 lma_window = 50
-nvda_prices = stockdata.create_dataset(["nvda"], stockdata.today_before(300), stockdata.today(), "1d")
-msft_prices = stockdata.create_dataset(["msft"], stockdata.today_before(300), stockdata.today(), "1d")
-strategy_nvda = strategy.Strategy(nvda_prices, sma_window, lma_window)
-strategy_msft = strategy.Strategy(msft_prices, sma_window, lma_window)
+stocks = ["nvda", "meta", "msft", "tsla"]
+init_amount = 1000000
+units = []
+threads = []
+for stock in stocks:
+    prices = stockdata.create_dataset([stock], stockdata.today_before(300), stockdata.today(), "1d")
+    stgy = strategy.Strategy(prices, sma_window, lma_window)
+    units.append(backtest.BacktestUnit(stgy, init_amount / len(stocks)))
+    threads.append(threading.Thread(target=units[-1].run))
+    threads[-1].start()
 
-init_amount = 100000
+for thread in threads:
+    thread.join()
 
-nvda_unit = backtest.BacktestUnit(strategy_nvda, init_amount / 2)
-msft_unit = backtest.BacktestUnit(strategy_msft, init_amount / 2)
+sum_net_wealth = 0
+for unit in units:
+    sum_net_wealth += unit.net_wealth[-1]
 
-with concurrent.futures.ThreadPoolExecutor() as executor:
-    nuf = executor.submit(nvda_unit.test)
-    tuf = executor.submit(msft_unit.test)
-    
-    profit = calculate_profit(nuf.result()[-1] + tuf.result()[-1], init_amount)
-    print(profit)
+profit = calculate_profit(sum_net_wealth, init_amount)
+print(profit)

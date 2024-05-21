@@ -18,13 +18,13 @@ class Strategy:
         self.lma_window = lma_window
         self._normalize()
         
-    def action(self):
+    def action(self, bar):
         #sma , lma
         sma = self.norm_prices.rolling(window=self.sma_window).mean()
         lma = self.norm_prices.rolling(window=self.lma_window).mean()
-        sma_tail = sma.iloc[-1][0]
-        lma_tail = lma.iloc[-1][0]
-        sma_shifted = sma.shift(1).iloc[-1][0]
+        sma_tail = sma.iloc[bar][0]
+        lma_tail = lma.iloc[bar][0]
+        sma_shifted = sma.shift(1).iloc[bar][0]
         if sma_tail > lma_tail and sma_tail >= sma_shifted:
             return BUY
         elif sma_tail < lma_tail and sma_tail < sma_shifted:

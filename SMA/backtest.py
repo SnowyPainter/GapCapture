@@ -18,23 +18,23 @@ class BacktestUnit:
         self.init_amount = init_amount
         self.strategy = stgy
     
-    def test(self):
+    def run(self):
         net_wealth = list()
         units = 0
         self.current_amount = self.init_amount
         self.bar = self.strategy.lma_window
         while self.bar < len(self.strategy.prices):
-            action = self.strategy.action()
+            action = self.strategy.action(self.bar)
             price = self.strategy.prices.iloc[self.bar][0]
             if action == strategy.BUY:
-                units += self._max_units(price)
-                self.current_amount -= self._buy(price, units)
+                affordable = self._max_units(price)
+                units += affordable
+                self.current_amount -= self._buy(price, affordable)
             elif action == strategy.SELL:
                 self.current_amount += self._sell(price, units)
                 units = 0
 
             net_wealth.append(self.current_amount + units * price)
-            
             self.bar += 1
             
-        return net_wealth
+        self.net_wealth = net_wealth
