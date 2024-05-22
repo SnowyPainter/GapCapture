@@ -70,7 +70,7 @@ broker = mojito.KoreaInvestment(api_key=k, api_secret=s, acc_no=a, mock=mock)
 agent = tf.keras.models.load_model("./MarketGap/hmsk.keras")
 resp = broker.fetch_balance()
 current_amount = int(resp['output2'][0]['prvs_rcdl_excc_amt'])
-symbols = ["042700", "000660"] #hanmi semiconductor / sk hynix
+symbols = [SYMBOL1, SYMBOL2] #hanmi semiconductor / sk hynix
 env = learn.MarketEnvironment(symbols[0]+".KS", symbols[1]+".KS", stockdata.today_before(14, tz='Asia/Seoul'), stockdata.today(tz='Asia/Seoul'),"5m")
 
 stocks_qty = {}
@@ -81,20 +81,18 @@ symbol1_units = 0 if not symbols[0] in stocks_qty else stocks_qty[symbols[0]]
 symbol2_units = 0 if not symbols[1] in stocks_qty else stocks_qty[symbols[1]]
 
 trades = 0
-fee = 0.005
+fee = FEE
 net_wealths = list()
 
 start_time = datetime.time(9, 0)
 end_time = datetime.time(15, 30)
 
 init_amount = current_amount
-p = 0.1
 
-logger = log.Logger("한미반도체, SK하이닉스")
+logger = log.Logger(f"{SYMBOL1_NAME}, {SYMBOL2_NAME}")
 logger.log(f"평가 : {resp['output2'][0]['tot_evlu_amt']}")
 logger.log(f"예수금 : {current_amount}")
 logger.log(f"보유 종목 : {stocks_qty}")
-logger.log(f"1회 매매 주식 비율(자산에서) : {p}")
 
 while True:
     current_time = datetime.datetime.now().time()
