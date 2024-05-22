@@ -7,10 +7,15 @@ def reshape(state):
     return np.reshape(state, [1, 1, 2])
 
 class Strategy1:
-    def _affordable_stocks(self, stock_price):
-        n = math.floor((self.amount) / stock_price)
-        if n > 5:
-            n = 5
+    def get_amount_of_sell(self, curr_units):
+        n = curr_units
+        if n > 120:
+            n = 120
+        return n
+    def get_amount_of_buy(self, stock_price):
+        n = math.floor(self.current_balance / stock_price)
+        if n > 120:
+            n = 120
         return n
 
     def _sell(self, units, price):
@@ -59,27 +64,25 @@ class Strategy1:
             # symbol 2 buy, symbol 1 sell
             # if 0 -> hold
             if action == 0:
-                print("홀딩")
+                print(f"홀딩 {self.current_balance}")
             if action != 0:
                 if action == 1:
                     if self.symbol2_units > 0:
-                        units = self._affordable_stocks(prices[1])
-                        print(f"symbol2 {units} 매도")
+                        units = self.get_amount_of_sell(self.symbol2_units)
+                        print(f"symbol2 {units} 매도 {self.current_balance}")
                         self.symbol2_units -= self._sell(units, prices[1])
-                    symbol1_amount = math.floor((self.current_balance) / prices[0])
-                    units = self._affordable_stocks(prices[0])
+                    units = self.get_amount_of_buy(prices[0])
                     if units > 0:
-                        print(f"symbol1 {units} 매수")
+                        print(f"symbol1 {units} 매수 {self.current_balance}")
                         self.symbol1_units += self._buy(units, prices[0])
                 elif action == 2:
                     if self.symbol1_units > 0:
-                        units = self._affordable_stocks(prices[0])
-                        print(f"symbol1 {units} 매도")
+                        units = self.get_amount_of_sell(self.symbol1_units)
+                        print(f"symbol1 {units} 매도 {self.current_balance}")
                         self.symbol1_units -= self._sell(units, prices[0])
-                    symbol2_amount = math.floor((self.current_balance) / prices[1])
-                    units = self._affordable_stocks(prices[1])
+                    units = self.get_amount_of_buy(prices[1])
                     if units > 0:
-                        print(f"symbol2 {units} 매수")
+                        print(f"symbol2 {units} 매수 {self.current_balance}")
                         self.symbol2_units += self._buy(units, prices[1])
             
             nw = self.symbol1_units * prices[0] + self.symbol2_units * prices[1] + self.current_balance
