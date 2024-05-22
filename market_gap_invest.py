@@ -13,13 +13,13 @@ from KEYS import *
 from settings import *
 import log
 
-def get_amount_of_sell(init_amount, stock_price):
-    n = math.floor((init_amount) / stock_price)
+def get_amount_of_sell(curr_units):
+    n = curr_units
     if n > SELL_AMOUNT:
         n = SELL_AMOUNT
     return n
-def get_amount_of_buy(init_amount, stock_price):
-    n = math.floor((init_amount) / stock_price)
+def get_amount_of_buy(curr_amount, stock_price):
+    n = math.floor((curr_amount) / stock_price)
     if n > BUY_AMOUNT:
         n = BUY_AMOUNT
     return n
@@ -60,7 +60,11 @@ k = REAL_KEY
 s = REAL_APISECRET
 a = REAL_ACCOUNT_NO
 mock = False
+SELL_AMOUNT = 4
+BUY_AMOUNT = 4
 if t != "y":
+    SELL_AMOUNT = 30
+    BUY_AMOUNT = 30
     k = KEY
     s = APISECRET
     a = ACCOUNT_NO
@@ -109,15 +113,14 @@ while True:
         else:
             if action == 1:
                 if symbol2_units > 0:
-                    units = get_amount_of_sell(init_amount, symbol2_price)
+                    units = get_amount_of_sell(symbol2_units)
                     logger.log(f"{action} : SOLD {symbols[1]} - {units} / {symbol2_price}")
                     sell_order(symbols[1], units)
                     current_amount += units * symbol2_price
                     symbol2_units -= units
                     trades += 1
-                symbol1_amount = math.floor(current_amount / symbol1_price)
-                units = get_amount_of_buy(init_amount, symbol1_price)
-                if symbol1_amount > 0:
+                units = get_amount_of_buy(current_amount, symbol1_price)
+                if units > 0:
                     logger.log(f"{action} : BUY {symbols[0]} - {units} / {symbol1_price}")
                     buy_order(symbols[0], units)
                     current_amount -= units * symbol1_price + units * fee
@@ -127,15 +130,15 @@ while True:
                     logger.log(f"No Money to buy {symbols[0]} - {current_amount}")
             elif action == 2:
                 if symbol1_units > 0:
-                    units = get_amount_of_sell(init_amount, symbol1_price)
+                    units = get_amount_of_sell(symbol1_units)
                     logger.log(f"{action} : SOLD {symbols[0]} - {units} / {symbol1_price}")
                     sell_order(symbols[0], units)
                     current_amount += units * symbol1_price
                     symbol1_units -= units
                     trades += 1
-                symbol2_amount = math.floor(current_amount / symbol2_price)
+                
                 units = get_amount_of_buy(init_amount, symbol2_price)
-                if symbol2_amount > 0:
+                if units > 0:
                     logger.log(f"{action} : BUY {symbols[1]} - {units} / {symbol2_price}")
                     buy_order(symbols[1], units)
                     current_amount -= units * symbol2_price + units * fee
