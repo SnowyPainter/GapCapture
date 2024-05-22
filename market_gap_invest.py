@@ -62,6 +62,7 @@ a = REAL_ACCOUNT_NO
 mock = False
 SELL_AMOUNT = 4
 BUY_AMOUNT = 4
+subtitle = "실전투자"
 if t != "y":
     SELL_AMOUNT = 30
     BUY_AMOUNT = 30
@@ -69,7 +70,9 @@ if t != "y":
     s = APISECRET
     a = ACCOUNT_NO
     mock = True
+    subtitle = "모의투자"
 
+logger = log.Logger(f"{SYMBOL1_NAME}, {SYMBOL2_NAME}", subtitle)
 broker = mojito.KoreaInvestment(api_key=k, api_secret=s, acc_no=a, mock=mock)
 agent = tf.keras.models.load_model("./MarketGap/hmsk.keras")
 resp = broker.fetch_balance()
@@ -93,7 +96,6 @@ end_time = datetime.time(15, 30)
 
 init_amount = current_amount
 
-logger = log.Logger(f"{SYMBOL1_NAME}, {SYMBOL2_NAME}")
 logger.log(f"평가 : {resp['output2'][0]['tot_evlu_amt']}")
 logger.log(f"예수금 : {current_amount}")
 logger.log(f"보유 종목 : {stocks_qty}")
