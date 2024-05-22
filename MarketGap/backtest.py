@@ -7,10 +7,10 @@ def reshape(state):
     return np.reshape(state, [1, 1, 2])
 
 class Strategy1:
-    def _affordable_stocks(self, stock_price, percent, affordables):
-        n = math.floor((self.amount * percent) / stock_price)
-        if n >= affordables:
-            n = affordables
+    def _affordable_stocks(self, stock_price):
+        n = math.floor((self.amount) / stock_price)
+        if n > 5:
+            n = 5
         return n
 
     def _sell(self, units, price):
@@ -63,21 +63,21 @@ class Strategy1:
             if action != 0:
                 if action == 1:
                     if self.symbol2_units > 0:
-                        units = self._affordable_stocks(prices[1], deal_percent, self.symbol2_units)
+                        units = self._affordable_stocks(prices[1])
                         print(f"symbol2 {units} 매도")
                         self.symbol2_units -= self._sell(units, prices[1])
                     symbol1_amount = math.floor((self.current_balance) / prices[0])
-                    units = self._affordable_stocks(prices[0], deal_percent, symbol1_amount)
+                    units = self._affordable_stocks(prices[0])
                     if units > 0:
                         print(f"symbol1 {units} 매수")
                         self.symbol1_units += self._buy(units, prices[0])
                 elif action == 2:
                     if self.symbol1_units > 0:
-                        units = self._affordable_stocks(prices[0], deal_percent, self.symbol1_units)
+                        units = self._affordable_stocks(prices[0])
                         print(f"symbol1 {units} 매도")
                         self.symbol1_units -= self._sell(units, prices[0])
                     symbol2_amount = math.floor((self.current_balance) / prices[1])
-                    units = self._affordable_stocks(prices[1], deal_percent, symbol2_amount)
+                    units = self._affordable_stocks(prices[1])
                     if units > 0:
                         print(f"symbol2 {units} 매수")
                         self.symbol2_units += self._buy(units, prices[1])
