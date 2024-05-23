@@ -70,17 +70,23 @@ class Strategy1:
             # if 2
             # symbol 2 buy, symbol 1 sell
             # if 0 -> hold
+            
+            if self.symbol1_units <= 0:
+                self.entry_price_symbol1 = 0
+            if self.symbol2_units <= 0:
+                self.entry_price_symbol2 = 0
+            
             symbol1_loss = (prices[0] - self.entry_price_symbol1) / self.entry_price_symbol1
             symbol2_loss = (prices[1] - self.entry_price_symbol2) / self.entry_price_symbol2
             
             # TESTING TESTING TESTING TESTING TESTING
-            if symbol1_loss > 0.035:
+            if self.symbol1_units > 0 and symbol1_loss > 0.035:
                 units = self.get_amount_of_sell(self.symbol1_units)
-                print(f"이익 초과 symbol1 {units} 매도")
+                print(f"이익 초과 symbol1 {units} / {symbol1_loss} 매도")
                 self.symbol1_units -= self._sell(units, prices[0])
-            if symbol2_loss > 0.035:
+            if self.symbol2_units > 0 and symbol2_loss > 0.035:
                 units = self.get_amount_of_sell(self.symbol2_units)
-                print(f"이익 초과 symbol2 {units} 매도")
+                print(f"이익 초과 symbol2 {units} / {symbol2_loss} 매도")
                 self.symbol2_units -= self._sell(units, prices[1])
             # TESTING TESTING TESTING TESTING TESTING
             
@@ -95,7 +101,7 @@ class Strategy1:
                     units = self.get_amount_of_buy(prices[0])
                     if units > 0:
                         self.set_entry_price_symbol1(units, prices[0])
-                        print(f"symbol1 {units} 매수 {self.current_balance}")
+                        print(f"symbol1 {units} 매수 {self.current_balance} 평단 : {self.entry_price_symbol1}")
                         self.symbol1_units += self._buy(units, prices[0])
                 elif action == 2:
                     if self.symbol1_units > 0:
@@ -105,7 +111,7 @@ class Strategy1:
                     units = self.get_amount_of_buy(prices[1])
                     if units > 0:
                         self.set_entry_price_symbol2(units, prices[1])
-                        print(f"symbol2 {units} 매수 {self.current_balance}")
+                        print(f"symbol2 {units} 매수 {self.current_balance} 평단 : {self.entry_price_symbol2}")
                         self.symbol2_units += self._buy(units, prices[1])
             
             nw = self.symbol1_units * prices[0] + self.symbol2_units * prices[1] + self.current_balance
