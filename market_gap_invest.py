@@ -67,7 +67,7 @@ def buy(logger, units, symbol, price, fee):
     logger.log(f"BUY {symbol} - {units} / {price}")
     trades += 1
     return units
-def sell(logger,symbol, price):
+def sell(logger, symbol, price):
     if symbol == symbols[0]:
         units = get_amount_of_sell(symbol1_units)
     elif symbol == symbols[1]:
@@ -142,6 +142,10 @@ while True:
             symbol1_units -= sell(logger, symbols[0], symbol1_price)
         if symbol2_loss >= TAKE_PROFIT:
             symbol2_units -= sell(logger, symbols[1], symbol2_price)
+        if symbol1_units <= 0:
+            symbol1_entry_price = 0
+        if symbol2_units <= 0:
+            symbol2_entry_price = 0
         
         action = np.argmax(agent.predict(state, verbose=0)[0, 0])
         if action == 0:
@@ -152,7 +156,7 @@ while True:
                     symbol2_units -= sell(logger, symbols[1], symbol2_price)
                 units = get_amount_of_buy(current_amount, symbol1_price)
                 if units > 0:
-                    symbol1_units += buy(logger, units, symbols[0], symbol1_price)
+                    symbol1_units += buy(logger, units, symbols[0], symbol1_price, fee)
                 else:
                     logger.log(f"No Money to buy {symbols[0]} - {current_amount}")
             elif action == 2:
@@ -160,7 +164,7 @@ while True:
                     symbol1_units -= sell(logger, symbols[0], symbol1_price)
                 units = get_amount_of_buy(init_amount, symbol2_price)
                 if units > 0:
-                    symbol2_units += buy(logger, units, symbols[1], symbol2_price)
+                    symbol2_units += buy(logger, units, symbols[1], symbol2_price, fee)
                 else:
                     logger.log(f"No Money to buy {symbols[1]} - {current_amount}")
         net_wealths.append(symbol1_units * symbol1_price + symbol2_units * symbol2_price + current_amount)
