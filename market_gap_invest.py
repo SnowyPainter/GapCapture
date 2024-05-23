@@ -38,7 +38,10 @@ def sell_order(symbol, qty):
     )
     pprint.pprint(resp)
     time.sleep(1)
-
+def set_entry_price(curr_entry_price, units, new_price):
+    curr_entry_price += units * new_price
+    curr_entry_price /= (1 if curr_entry_price == 0 else (units + 1))
+    return curr_entry_price
 def get_price(symbol):
     resp = broker.fetch_price(symbol)
     return int(resp['output']['stck_prpr'])
@@ -54,6 +57,26 @@ def create_prices(symbol1, symbol2):
     return df
 def reshape(state):
     return np.reshape(state, [1, 1, 2])
+def buy(logger, units, symbol, price, fee):
+    buy_order(symbol, units)
+    if symbol == symbols[0]:
+        symbol1_entry_price = set_entry_price(symbol1_entry_price, units, symbol1_price)
+    elif symbol == symbols[1]:
+        symbol2_entry_price = set_entry_price(symbol2_entry_price, units, symbol2_price)
+    current_amount -= units * price * (1+fee)
+    logger.log(f"BUY {symbol} - {units} / {price}")
+    trades += 1
+    return units
+def sell(logger,symbol, price):
+    if symbol == symbols[0]:
+        units = get_amount_of_sell(symbol1_units)
+    elif symbol == symbols[1]:
+        units = get_amount_of_sell(symbol2_units)
+    sell_order(symbol, units)
+    current_amount += units * price
+    logger.log(f"SOLD {symbol} - {units} / {price}")
+    trades += 1
+    return units
 
 t = input("실전투자(y), 모의투자(n) : ")
 k = REAL_KEY
@@ -100,6 +123,9 @@ logger.log(f"평가 : {resp['output2'][0]['tot_evlu_amt']}")
 logger.log(f"예수금 : {current_amount}")
 logger.log(f"보유 종목 : {stocks_qty}")
 
+symbol1_entry_price = 0
+symbol2_entry_price = 0
+
 while True:
     current_time = datetime.datetime.now().time()
     if start_time <= current_time <= end_time:
@@ -109,43 +135,32 @@ while True:
         symbol1_price = prices.iloc[0][0]
         symbol2_price = prices.iloc[0][1]
         
+        symbol1_loss = (symbol1_price - symbol1_entry_price) / symbol1_entry_price
+        symbol2_loss = (symbol2_price - symbol2_entry_price) / symbol2_entry_price
+        
+        if symbol1_loss >= TAKE_PROFIT:
+            symbol1_units -= sell(logger, symbols[0], symbol1_price)
+        if symbol2_loss >= TAKE_PROFIT:
+            symbol2_units -= sell(logger, symbols[1], symbol2_price)
+        
         action = np.argmax(agent.predict(state, verbose=0)[0, 0])
         if action == 0:
             logger.log(f"{action} : Holding")
         else:
             if action == 1:
                 if symbol2_units > 0:
-                    units = get_amount_of_sell(symbol2_units)
-                    logger.log(f"{action} : SOLD {symbols[1]} - {units} / {symbol2_price}")
-                    sell_order(symbols[1], units)
-                    current_amount += units * symbol2_price
-                    symbol2_units -= units
-                    trades += 1
+                    symbol2_units -= sell(logger, symbols[1], symbol2_price)
                 units = get_amount_of_buy(current_amount, symbol1_price)
                 if units > 0:
-                    logger.log(f"{action} : BUY {symbols[0]} - {units} / {symbol1_price}")
-                    buy_order(symbols[0], units)
-                    current_amount -= units * symbol1_price + units * fee
-                    symbol1_units += units
-                    trades += 1
+                    symbol1_units += buy(logger, units, symbols[0], symbol1_price)
                 else:
                     logger.log(f"No Money to buy {symbols[0]} - {current_amount}")
             elif action == 2:
                 if symbol1_units > 0:
-                    units = get_amount_of_sell(symbol1_units)
-                    logger.log(f"{action} : SOLD {symbols[0]} - {units} / {symbol1_price}")
-                    sell_order(symbols[0], units)
-                    current_amount += units * symbol1_price
-                    symbol1_units -= units
-                    trades += 1
-                
+                    symbol1_units -= sell(logger, symbols[0], symbol1_price)
                 units = get_amount_of_buy(init_amount, symbol2_price)
                 if units > 0:
-                    logger.log(f"{action} : BUY {symbols[1]} - {units} / {symbol2_price}")
-                    buy_order(symbols[1], units)
-                    current_amount -= units * symbol2_price + units * fee
-                    symbol2_units += units
-                    trades += 1
+                    symbol2_units += buy(logger, units, symbols[1], symbol2_price)
                 else:
                     logger.log(f"No Money to buy {symbols[1]} - {current_amount}")
         net_wealths.append(symbol1_units * symbol1_price + symbol2_units * symbol2_price + current_amount)
