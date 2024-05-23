@@ -109,12 +109,15 @@ symbol2_entry_price = 0
 def buy(logger, units, symbol, price, fee):
     global symbol1_entry_price, symbol2_entry_price, current_amount, trades
     buy_order(symbol, units)
+    ep = 0
     if symbol == symbols[0]:
         symbol1_entry_price = set_entry_price(symbol1_entry_price, units, price)
+        ep = symbol1_entry_price
     elif symbol == symbols[1]:
         symbol2_entry_price = set_entry_price(symbol2_entry_price, units, price)
+        ep = symbol2_entry_price
     current_amount -= units * price * (1+fee)
-    logger.log(f"BUY {symbol} - {units} / {price}")
+    logger.log(f"BUY {symbol} - {units} / {price}, Estimated Price : {ep}")
     trades += 1
     return units
 def sell(logger, symbol, price, loss):
@@ -131,13 +134,12 @@ def sell(logger, symbol, price, loss):
 
 while True:
     current_time = datetime.datetime.now().time()
-    if True:#start_time <= current_time <= end_time:
+    if start_time <= current_time <= end_time:
         prices = create_prices(symbols[0], symbols[1])
         env.append_raw(prices)
         state = reshape(np.array([env.get_last()]))
         symbol1_price = prices.iloc[0][0]
         symbol2_price = prices.iloc[0][1]
-        
         
         symbol1_loss = ((symbol1_price - symbol1_entry_price) / symbol1_entry_price) if symbol1_entry_price != 0 else 0
         symbol2_loss = ((symbol2_price - symbol2_entry_price) / symbol2_entry_price) if symbol2_entry_price != 0 else 0
@@ -157,7 +159,7 @@ while True:
         
         action = np.argmax(agent.predict(state, verbose=0)[0, 0])
         if action == 0:
-            logger.log(f"{action} : Holding")
+            logger.log(f"{action} : Holding, {symbols[0]}: {symbol1_units}, {symbols[1]}: {symbol2_units}")
         else:
             if action == 1:
                 if symbol2_units > 0:
