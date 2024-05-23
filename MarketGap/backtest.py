@@ -71,24 +71,24 @@ class Strategy1:
             # symbol 2 buy, symbol 1 sell
             # if 0 -> hold
             
-            if self.symbol1_units <= 0:
-                self.entry_price_symbol1 = 0
-            if self.symbol2_units <= 0:
-                self.entry_price_symbol2 = 0
-            
             symbol1_loss = (prices[0] - self.entry_price_symbol1) / self.entry_price_symbol1
             symbol2_loss = (prices[1] - self.entry_price_symbol2) / self.entry_price_symbol2
-            
-            # TESTING TESTING TESTING TESTING TESTING
-            if self.symbol1_units > 0 and symbol1_loss > 0.035:
+            if self.symbol1_units > 0:
                 units = self.get_amount_of_sell(self.symbol1_units)
-                print(f"이익 초과 symbol1 {units} / {symbol1_loss} 매도")
-                self.symbol1_units -= self._sell(units, prices[0])
-            if self.symbol2_units > 0 and symbol2_loss > 0.035:
+                if symbol1_loss > 0.035: #tp
+                    print(f"이익 초과 symbol1 {units} / {symbol1_loss} 매도")
+                    self.symbol1_units -= self._sell(units, prices[0])
+                elif symbol1_loss < -0.05:
+                    print(f"손절 symbol1 {units} / {symbol1_loss} 매도")
+                    self.symbol1_units -= self._sell(units, prices[0])
+            if self.symbol2_units > 0:
                 units = self.get_amount_of_sell(self.symbol2_units)
-                print(f"이익 초과 symbol2 {units} / {symbol2_loss} 매도")
-                self.symbol2_units -= self._sell(units, prices[1])
-            # TESTING TESTING TESTING TESTING TESTING
+                if symbol2_loss > 0.035:
+                    print(f"이익 초과 symbol2 {units} / {symbol2_loss} 매도")
+                    self.symbol2_units -= self._sell(units, prices[1])
+                elif symbol2_loss < -0.05:
+                    print(f"손절 symbol2 {units} / {symbol2_loss} 매도")
+                    self.symbol2_units -= self._sell(units, prices[1])
             
             if action == 0:
                 print(f"홀딩 {self.current_balance}")
@@ -98,6 +98,8 @@ class Strategy1:
                         units = self.get_amount_of_sell(self.symbol2_units)
                         print(f"symbol2 {units} 매도 {self.current_balance}")
                         self.symbol2_units -= self._sell(units, prices[1])
+                        if self.symbol2_units <= 0:
+                            self.entry_price_symbol2 = 0
                     units = self.get_amount_of_buy(prices[0])
                     if units > 0:
                         self.set_entry_price_symbol1(units, prices[0])
@@ -108,6 +110,8 @@ class Strategy1:
                         units = self.get_amount_of_sell(self.symbol1_units)
                         print(f"symbol1 {units} 매도 {self.current_balance}")
                         self.symbol1_units -= self._sell(units, prices[0])
+                        if self.symbol1_units <= 0:
+                            self.entry_price_symbol1 = 0
                     units = self.get_amount_of_buy(prices[1])
                     if units > 0:
                         self.set_entry_price_symbol2(units, prices[1])
