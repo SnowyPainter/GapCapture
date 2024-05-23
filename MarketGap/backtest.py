@@ -71,8 +71,8 @@ class Strategy1:
             # symbol 2 buy, symbol 1 sell
             # if 0 -> hold
             
-            symbol1_loss = (prices[0] - self.entry_price_symbol1) / self.entry_price_symbol1
-            symbol2_loss = (prices[1] - self.entry_price_symbol2) / self.entry_price_symbol2
+            symbol1_loss = ((prices[0] - self.entry_price_symbol1) / self.entry_price_symbol1) if self.entry_price_symbol1 != 0 else 0
+            symbol2_loss = ((prices[1] - self.entry_price_symbol2) / self.entry_price_symbol2) if self.entry_price_symbol2 != 0 else 0
             if self.symbol1_units > 0:
                 units = self.get_amount_of_sell(self.symbol1_units)
                 if symbol1_loss > 0.035: #tp
