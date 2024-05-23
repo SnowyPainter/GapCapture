@@ -20,10 +20,10 @@ class Strategy1:
     
     def set_entry_price_symbol1(self, units, new_prices):
         self.entry_price_symbol1 += units * new_prices
-        self.entry_price_symbol1 /= (1 if self.entry_price_symbol1 == 0 else 2)
+        self.entry_price_symbol1 /= (1 if self.entry_price_symbol1 == 0 else (units + 1))
     def set_entry_price_symbol2(self, units, new_prices):
         self.entry_price_symbol2 += units * new_prices
-        self.entry_price_symbol2 /= (1 if self.entry_price_symbol2 == 0 else 2)
+        self.entry_price_symbol2 /= (1 if self.entry_price_symbol2 == 0 else (units + 1))
 
     def _sell(self, units, price):
         self.current_balance += units * price - units * self.fee
