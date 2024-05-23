@@ -75,11 +75,11 @@ class Strategy1:
             
             # TESTING TESTING TESTING TESTING TESTING
             if symbol1_loss > 0.035:
-                units = self._affordable_stocks(prices[0])
+                units = self.get_amount_of_sell(self.symbol1_units)
                 print(f"이익 초과 symbol1 {units} 매도")
                 self.symbol1_units -= self._sell(units, prices[0])
             if symbol2_loss > 0.035:
-                units = self._affordable_stocks(prices[1])
+                units = self.get_amount_of_sell(self.symbol2_units)
                 print(f"이익 초과 symbol2 {units} 매도")
                 self.symbol2_units -= self._sell(units, prices[1])
             # TESTING TESTING TESTING TESTING TESTING
@@ -94,6 +94,7 @@ class Strategy1:
                         self.symbol2_units -= self._sell(units, prices[1])
                     units = self.get_amount_of_buy(prices[0])
                     if units > 0:
+                        self.set_entry_price_symbol1(units, prices[0])
                         print(f"symbol1 {units} 매수 {self.current_balance}")
                         self.symbol1_units += self._buy(units, prices[0])
                 elif action == 2:
@@ -103,6 +104,7 @@ class Strategy1:
                         self.symbol1_units -= self._sell(units, prices[0])
                     units = self.get_amount_of_buy(prices[1])
                     if units > 0:
+                        self.set_entry_price_symbol2(units, prices[1])
                         print(f"symbol2 {units} 매수 {self.current_balance}")
                         self.symbol2_units += self._buy(units, prices[1])
             
