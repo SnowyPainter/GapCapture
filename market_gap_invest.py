@@ -138,10 +138,11 @@ while True:
         symbol1_loss = (symbol1_price - symbol1_entry_price) / symbol1_entry_price
         symbol2_loss = (symbol2_price - symbol2_entry_price) / symbol2_entry_price
         
-        if symbol1_loss >= TAKE_PROFIT:
+        if symbol1_units > 0 and symbol1_loss >= TAKE_PROFIT:
             symbol1_units -= sell(logger, symbols[0], symbol1_price)
-        if symbol2_loss >= TAKE_PROFIT:
+        if symbol2_units > 0 and symbol2_loss >= TAKE_PROFIT:
             symbol2_units -= sell(logger, symbols[1], symbol2_price)
+            
         if symbol1_units <= 0:
             symbol1_entry_price = 0
         if symbol2_units <= 0:
