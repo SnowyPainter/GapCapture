@@ -12,6 +12,13 @@ class Strategy1:
         if n > 5:
             n = 5
         return n
+    
+    def set_entry_price_symbol1(self, units, new_prices):
+        self.entry_price_symbol1 += units * new_prices
+        self.entry_price_symbol1 /= (1 if self.entry_price_symbol1 == 0 else 2)
+    def set_entry_price_symbol2(self, units, new_prices):
+        self.entry_price_symbol2 += units * new_prices
+        self.entry_price_symbol2 /= (1 if self.entry_price_symbol2 == 0 else 2)
 
     def _sell(self, units, price):
         self.current_balance += units * price - units * self.fee
@@ -38,14 +45,14 @@ class Strategy1:
         self.units = 0
         self.position = 0
         self.trades = 0
-
-        self.entry_price = 0
-        
         self.net_wealths = list()
         bar = 1
         self.current_balance = self.amount
         self.symbol1_units = 0
         self.symbol2_units = 0
+        
+        self.entry_price_symbol1 = 0
+        self.entry_price_symbol2 = 0
         
         deal_percent = 0.2
 
@@ -58,6 +65,20 @@ class Strategy1:
             # if 2
             # symbol 2 buy, symbol 1 sell
             # if 0 -> hold
+            symbol1_loss = (prices[0] - self.entry_price_symbol1) / self.entry_price_symbol1
+            symbol2_loss = (prices[1] - self.entry_price_symbol2) / self.entry_price_symbol2
+            
+            # TESTING TESTING TESTING TESTING TESTING
+            if symbol1_loss > 0.035:
+                units = self._affordable_stocks(prices[0])
+                print(f"이익 초과 symbol1 {units} 매도")
+                self.symbol1_units -= self._sell(units, prices[0])
+            if symbol2_loss > 0.035:
+                units = self._affordable_stocks(prices[1])
+                print(f"이익 초과 symbol2 {units} 매도")
+                self.symbol2_units -= self._sell(units, prices[1])
+            # TESTING TESTING TESTING TESTING TESTING
+            
             if action == 0:
                 print("홀딩")
             if action != 0:
@@ -66,7 +87,6 @@ class Strategy1:
                         units = self._affordable_stocks(prices[1])
                         print(f"symbol2 {units} 매도")
                         self.symbol2_units -= self._sell(units, prices[1])
-                    symbol1_amount = math.floor((self.current_balance) / prices[0])
                     units = self._affordable_stocks(prices[0])
                     if units > 0:
                         print(f"symbol1 {units} 매수")
@@ -76,7 +96,6 @@ class Strategy1:
                         units = self._affordable_stocks(prices[0])
                         print(f"symbol1 {units} 매도")
                         self.symbol1_units -= self._sell(units, prices[0])
-                    symbol2_amount = math.floor((self.current_balance) / prices[1])
                     units = self._affordable_stocks(prices[1])
                     if units > 0:
                         print(f"symbol2 {units} 매수")
