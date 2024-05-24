@@ -29,8 +29,8 @@ def buy_order(symbol, qty): #market price
         symbol=symbol,
         quantity=qty
     )
-    pprint.pprint(resp)
     time.sleep(1)
+    return resp['msg1'] == '주문가능금액을 초과 했습니다'
 def sell_order(symbol, qty):
     resp = broker.create_market_sell_order(
         symbol=symbol,
@@ -105,10 +105,12 @@ logger.log(f"보유 종목 : {stocks_qty}")
 
 def buy(logger, units, symbol, price, fee):
     global symbol1_entry_price, symbol2_entry_price, current_amount, trades
-    buy_order(symbol, units)
-    current_amount -= units * price * (1+fee)
-    logger.log(f"BUY {symbol} - {units} / {price}")
-    trades += 1
+    if buy_order(symbol, units):
+        units = 0
+    else: #정상 체결
+        current_amount -= units * price * (1+fee)
+        logger.log(f"BUY {symbol} - {units} / {price}")
+        trades += 1
     return units
 def sell(logger, symbol, price, loss):
     global current_amount, trades
