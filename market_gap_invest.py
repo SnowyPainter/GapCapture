@@ -103,21 +103,11 @@ logger.log(f"평가 : {resp['output2'][0]['tot_evlu_amt']}")
 logger.log(f"예수금 : {current_amount}")
 logger.log(f"보유 종목 : {stocks_qty}")
 
-symbol1_entry_price = 0
-symbol2_entry_price = 0
-
 def buy(logger, units, symbol, price, fee):
     global symbol1_entry_price, symbol2_entry_price, current_amount, trades
     buy_order(symbol, units)
-    ep = 0
-    if symbol == symbols[0]:
-        symbol1_entry_price = set_entry_price(symbol1_entry_price, units, price)
-        ep = symbol1_entry_price
-    elif symbol == symbols[1]:
-        symbol2_entry_price = set_entry_price(symbol2_entry_price, units, price)
-        ep = symbol2_entry_price
     current_amount -= units * price * (1+fee)
-    logger.log(f"BUY {symbol} - {units} / {price}, Estimated Price : {ep}")
+    logger.log(f"BUY {symbol} - {units} / {price}")
     trades += 1
     return units
 def sell(logger, symbol, price, loss):
@@ -135,15 +125,26 @@ def sell(logger, symbol, price, loss):
 while True:
     current_time = datetime.datetime.now().time()
     if start_time <= current_time <= end_time:
+        resp = broker.fetch_balance()
+        avgp = {}
+        for stock in resp['output1']:
+            avgp[stock['pdno']] = float(stock['pchs_avg_pric'])
+
         prices = create_prices(symbols[0], symbols[1])
         env.append_raw(prices)
         state = reshape(np.array([env.get_last()]))
         symbol1_price = prices.iloc[0][0]
         symbol2_price = prices.iloc[0][1]
         
-        symbol1_loss = ((symbol1_price - symbol1_entry_price) / symbol1_entry_price) if symbol1_entry_price != 0 else 0
-        symbol2_loss = ((symbol2_price - symbol2_entry_price) / symbol2_entry_price) if symbol2_entry_price != 0 else 0
-        
+        if symbols[0] in avgp:
+            symbol1_loss = ((symbol1_price - avgp[symbols[0]]) / avgp[symbols[0]]) if avgp[symbols[0]] != 0 else 0
+        else:
+            symbol1_loss = 0
+        if symbols[1] in avgp:
+            symbol2_loss = ((symbol2_price - avgp[symbols[1]]) / avgp[symbols[1]]) if avgp[symbols[1]] != 0 else 0
+        else:
+            symbol2_loss = 0
+        print(symbol1_loss, symbol2_loss)
         if symbol1_units > 0:
             if symbol1_loss >= TAKE_PROFIT or symbol1_loss <= STOP_LOSS:
                 symbol1_units -= sell(logger, symbols[0], symbol1_price, symbol1_loss)
