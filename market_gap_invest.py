@@ -156,9 +156,9 @@ while True:
                 symbol2_units -= sell(logger, symbols[1], symbol2_price, symbol2_loss)
             
         if symbol1_units <= 0:
-            symbol1_entry_price = 0
+            avgp[symbols[0]] = 0
         if symbol2_units <= 0:
-            symbol2_entry_price = 0
+            avgp[symbols[1]] = 0
         
         action = np.argmax(agent.predict(state, verbose=0)[0, 0])
         if action == 0:
