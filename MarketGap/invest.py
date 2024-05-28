@@ -75,8 +75,7 @@ class GapInvest:
         self.logger = log.Logger(f"{self.SYMBOL1_NAME}, {self.SYMBOL2_NAME}", subtitle)
     def __init__(self, key, api_secret, account_no, mock, model_path, settings, subtitle=""):
         config = configparser.ConfigParser()
-        config.read(settings)
-        
+        config.read("./hanmi_sk_settings.ini")
         self.SELL_AMOUNT = config['SETTINGS'].getint('SELL_AMOUNT')
         self.BUY_AMOUNT = config['SETTINGS'].getint('BUY_AMOUNT')
         self.SYMBOL1 = config['SETTINGS']['SYMBOL1']
@@ -107,10 +106,9 @@ class GapInvest:
         self.logger.log(f"평가 : {self.evaluate_amount}")
         self.logger.log(f"예수금 : {self.current_amount}")
         self.logger.log(f"보유 종목 : {self.SYMBOL1_NAME}({self.symbol1_units}), {self.SYMBOL2_NAME}({self.symbol2_units})")            
-
-        net_wealths = list()
-        
         while True:
+            now = datetime.now()
+
             resp = self.broker.fetch_balance()
             avgp = {self.SYMBOL1:0, self.SYMBOL2:0}
             for stock in resp['output1']:
@@ -152,5 +150,9 @@ class GapInvest:
                         self.symbol2_units += self.buy(units, self.SYMBOL2, symbol2_price)
                     else:
                         self.logger.log(f"No Money to buy {self.SYMBOL2} - {self.current_amount} / {symbol2_price}")
-            net_wealths.append(self.symbol1_units * symbol1_price + self.symbol2_units * symbol2_price + self.current_amount)
-            time.sleep(60*5)
+            
+            if now.hour >= 15 and now.minute >= 30:
+                self.logger.log(f"End Trade, Trades:{self.trades}")
+                break
+            else:
+                time.sleep(60*5)
