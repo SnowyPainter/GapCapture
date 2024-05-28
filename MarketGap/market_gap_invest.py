@@ -10,6 +10,9 @@ strategy1 = GapInvest.GapInvest(REAL_KEY, REAL_APISECRET, REAL_ACCOUNT_NO, False
 
 #strategy1.run()
 
+print("This program run investing algorithm every 09:00")
+print("The log will be written at this directory.")
+
 schedule.every().day.at("09:00").do(strategy1.run)
 
 while True:
