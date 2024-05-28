@@ -137,6 +137,8 @@ class GapInvest:
                 if action == 1:
                     if self.symbol2_units > 0:
                         self.symbol2_units -= self.sell(self.SYMBOL2, symbol2_price, symbol2_loss)
+                    else:
+                        self.logger.log(f"No {self.SYMBOL2} Units to sell")
                     units = self.get_amount_of_buy(self.current_amount, symbol1_price)
                     if units > 0:
                         self.symbol1_units += self.buy(units, self.SYMBOL1, symbol1_price)
@@ -145,6 +147,8 @@ class GapInvest:
                 elif action == 2:
                     if self.symbol1_units > 0:
                         self.symbol1_units -= self.sell(self.SYMBOL1, symbol1_price, symbol1_loss)
+                    else:
+                        self.logger.log(f"No {self.SYMBOL1} Units to sell")
                     units = self.get_amount_of_buy(self.current_amount, symbol2_price)
                     if units > 0:
                         self.symbol2_units += self.buy(units, self.SYMBOL2, symbol2_price)
