@@ -1,6 +1,6 @@
 import sys
 sys.path.append('..')
-import datetime
+from datetime import datetime
 import mojito
 import math
 import time
@@ -57,7 +57,7 @@ class GapInvest:
         if self.buy_order(symbol, units):
             units = 0
         else: #정상 체결
-            self.current_amount -= units * price * (1+FEE)
+            self.current_amount -= units * price * (1+self.FEE)
             self.logger.log(f"BUY {symbol} - {units} / {price}")
             self.trades += 1
         return units
@@ -80,7 +80,7 @@ class GapInvest:
         self.BUY_AMOUNT = config['SETTINGS'].getint('BUY_AMOUNT')
         self.SYMBOL1 = config['SETTINGS']['SYMBOL1']
         self.SYMBOL1_NAME = config['SETTINGS']['SYMBOL1_NAME']
-        self.SYMBOl2 = config['SETTINGS']['SYMBOL2']
+        self.SYMBOL2 = config['SETTINGS']['SYMBOL2']
         self.SYMBOL2_NAME = config['SETTINGS']['SYMBOL2_NAME']
         self.FEE = config['SETTINGS'].getfloat('FEE')
         self.TAKE_PROFIT = config['SETTINGS'].getfloat('TAKE_PROFIT')
