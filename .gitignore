@@ -3,3 +3,4 @@ __pycache__
 *.keras
 *.dat
 *.txt
+*.ini
