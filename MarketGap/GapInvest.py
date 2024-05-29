@@ -86,21 +86,21 @@ class GapInvest:
         
         self.broker = mojito.KoreaInvestment(api_key=key, api_secret=api_secret, acc_no=account_no, mock=mock)
         self.agent = tf.keras.models.load_model(model_path)
-        resp = self.broker.fetch_balance()
-        self.evaluate_amount = resp['output2'][0]['tot_evlu_amt']
-        self.current_amount = int(resp['output2'][0]['prvs_rcdl_excc_amt'])
-        symbols = [self.SYMBOL1, self.SYMBOL2]
-        self.env = learn.MarketEnvironment(symbols[0]+".KS", symbols[1]+".KS", stockdata.today_before(14, tz='Asia/Seoul'), stockdata.today(tz='Asia/Seoul'),"5m")
-        stocks_qty = {}
-        for stock in resp['output1']:
-            stocks_qty[stock['pdno']] = int(stock['hldg_qty'])
-        self.symbol1_units = 0 if not symbols[0] in stocks_qty else stocks_qty[symbols[0]]
-        self.symbol2_units = 0 if not symbols[1] in stocks_qty else stocks_qty[symbols[1]]
+        
+        self.env = learn.MarketEnvironment(self.SYMBOL1+".KS", self.SYMBOL2+".KS", stockdata.today_before(14, tz='Asia/Seoul'), stockdata.today(tz='Asia/Seoul'),"5m")
         self.logger = None
         self.trades = 0
         self.subtitle = subtitle
 
     def run(self):
+        resp = self.broker.fetch_balance()
+        stocks_qty = {}
+        for stock in resp['output1']:
+            stocks_qty[stock['pdno']] = int(stock['hldg_qty'])
+        self.symbol1_units = 0 if not self.SYMBOL1 in stocks_qty else stocks_qty[self.SYMBOL1]
+        self.symbol2_units = 0 if not self.SYMBOL2 in stocks_qty else stocks_qty[self.SYMBOL2]
+        self.evaluate_amount = resp['output2'][0]['tot_evlu_amt']
+        self.current_amount = int(resp['output2'][0]['prvs_rcdl_excc_amt'])
         self.create_logger(subtitle=self.subtitle)
         print(f"{self.SYMBOL1_NAME}, {self.SYMBOL2_NAME} Gap Investment Machine Started")
         self.logger.log(f"평가 : {self.evaluate_amount}")
