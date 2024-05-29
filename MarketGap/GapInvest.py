@@ -31,8 +31,8 @@ class GapInvest:
             symbol=symbol,
             quantity=qty
         )
+        pprint.pprint(resp)
         time.sleep(1)
-        return resp['msg1'] == '주문가능금액을 초과 했습니다'
     def sell_order(self, symbol, qty):
         resp = self.broker.create_market_sell_order(
             symbol=symbol,
@@ -54,12 +54,10 @@ class GapInvest:
         df.set_index('Datetime', inplace=True)
         return df
     def buy(self, units, symbol, price):
-        if self.buy_order(symbol, units):
-            units = 0
-        else: #정상 체결
-            self.current_amount -= units * price * (1+self.FEE)
-            self.logger.log(f"BUY {symbol} - {units} / {price}")
-            self.trades += 1
+        self.buy_order(symbol, units)
+        self.current_amount -= units * price * (1+self.FEE)
+        self.logger.log(f"BUY {symbol} - {units} / {price}")
+        self.trades += 1
         return units
     def sell(self, symbol, price, loss):
         if symbol == self.SYMBOL1:
@@ -100,9 +98,11 @@ class GapInvest:
         self.symbol2_units = 0 if not symbols[1] in stocks_qty else stocks_qty[symbols[1]]
         self.logger = None
         self.trades = 0
-        self.create_logger(subtitle=subtitle)
+        self.subtitle = subtitle
 
     def run(self):
+        self.create_logger(subtitle=self.subtitle)
+        print(f"{self.SYMBOL1_NAME}, {self.SYMBOL2_NAME} Gap Investment Machine Started")
         self.logger.log(f"평가 : {self.evaluate_amount}")
         self.logger.log(f"예수금 : {self.current_amount}")
         self.logger.log(f"보유 종목 : {self.SYMBOL1_NAME}({self.symbol1_units}), {self.SYMBOL2_NAME}({self.symbol2_units})")            
@@ -137,8 +137,6 @@ class GapInvest:
                 if action == 1:
                     if self.symbol2_units > 0:
                         self.symbol2_units -= self.sell(self.SYMBOL2, symbol2_price, symbol2_loss)
-                    else:
-                        self.logger.log(f"No {self.SYMBOL2} Units to sell")
                     units = self.get_amount_of_buy(self.current_amount, symbol1_price)
                     if units > 0:
                         self.symbol1_units += self.buy(units, self.SYMBOL1, symbol1_price)
@@ -147,8 +145,6 @@ class GapInvest:
                 elif action == 2:
                     if self.symbol1_units > 0:
                         self.symbol1_units -= self.sell(self.SYMBOL1, symbol1_price, symbol1_loss)
-                    else:
-                        self.logger.log(f"No {self.SYMBOL1} Units to sell")
                     units = self.get_amount_of_buy(self.current_amount, symbol2_price)
                     if units > 0:
                         self.symbol2_units += self.buy(units, self.SYMBOL2, symbol2_price)

@@ -8,7 +8,9 @@ from KEYS import *
 
 strategy1 = GapInvest.GapInvest(REAL_KEY, REAL_APISECRET, REAL_ACCOUNT_NO, False, "./hmsk.keras", "./hanmi_sk_settings.ini", "실전투자")
 
-#strategy1.run()
+strategy1.run()
+
+exit()
 
 print("This program run investing algorithm every 09:00")
 print("The log will be written at this directory.")
