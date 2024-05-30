@@ -56,8 +56,8 @@ class GapInvest:
         p1 = self.get_price(symbol1)
         time.sleep(1)
         p2 = self.get_price(symbol2)
-        df[symbol1+'.KS_Price'] = [p1]
-        df[symbol2+'.KS_Price'] = [p2]
+        df[symbol1+ f'.{self.TAG1}_Price'] = [p1]
+        df[symbol2+ f'.{self.TAG2}_Price'] = [p2]
         df['Datetime'] = [pd.to_datetime(stockdata.today(tz='Asia/Seoul'), format="%Y-%m-%d %H:%M:%S%z")]
         df.set_index('Datetime', inplace=True)
         return df
@@ -82,6 +82,8 @@ class GapInvest:
     def __init__(self, key, api_secret, account_no, mock, model_path, settings, subtitle=""):
         config = configparser.ConfigParser()
         config.read("./hanmi_sk_settings.ini")
+        self.TAG1 = config['SETTINGS']['SYMBOL1_TAG']
+        self.TAG2 = config['SETTINGS']['SYMBOL2_TAG']
         self.SELL_AMOUNT = config['SETTINGS'].getint('SELL_AMOUNT')
         self.BUY_AMOUNT = config['SETTINGS'].getint('BUY_AMOUNT')
         self.SYMBOL1 = config['SETTINGS']['SYMBOL1']
@@ -95,7 +97,7 @@ class GapInvest:
         self.broker = mojito.KoreaInvestment(api_key=key, api_secret=api_secret, acc_no=account_no, mock=mock)
         self.agent = tf.keras.models.load_model(model_path)
         
-        self.env = learn.MarketEnvironment(self.SYMBOL1+".KS", self.SYMBOL2+".KS", stockdata.today_before(14, tz='Asia/Seoul'), stockdata.today(tz='Asia/Seoul'),"5m")
+        self.env = learn.MarketEnvironment(self.SYMBOL1+f".{self.TAG1}", self.SYMBOL2+f".{self.TAG1}", stockdata.today_before(14, tz='Asia/Seoul'), stockdata.today(tz='Asia/Seoul'),"5m")
         self.logger = None
         self.trades = 0
         self.subtitle = subtitle
