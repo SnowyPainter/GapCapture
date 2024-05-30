@@ -5,5 +5,5 @@ class Logger:
         with open(self.fname, "a") as myfile:
             myfile.write(f"[{now}]\t{text}\n")
     def __init__(self, title, sub_title="") -> None:
-        self.fname = datetime.datetime.now().strftime("%Y %m %d") + " " + sub_title + ".txt"
+        self.fname = "./invest log/" + datetime.datetime.now().strftime("%Y %m %d") + " " + sub_title + ".txt"
         self.log(title)
