@@ -34,8 +34,8 @@ class Strategy1:
         self.trades += 1
         return units
     
-    def __init__(self, env, amount, fee):
-        self.agent = tf.keras.models.load_model("hmsk.keras")
+    def __init__(self, env, amount, fee, model):
+        self.agent = tf.keras.models.load_model(model)
         self.env = env
         self.amount = amount
         self.fee = fee

@@ -79,9 +79,9 @@ class GapInvest:
         return units
     def create_logger(self, subtitle):
         self.logger = log.Logger(f"{self.SYMBOL1_NAME}, {self.SYMBOL2_NAME}", subtitle)
-    def __init__(self, key, api_secret, account_no, mock, model_path, settings, subtitle=""):
+    def __init__(self, key, api_secret, account_no, mock, settings, subtitle=""):
         config = configparser.ConfigParser()
-        config.read("./hanmi_sk_settings.ini")
+        config.read(settings)
         self.TAG1 = config['SETTINGS']['SYMBOL1_TAG']
         self.TAG2 = config['SETTINGS']['SYMBOL2_TAG']
         self.SELL_AMOUNT = config['SETTINGS'].getint('SELL_AMOUNT')
@@ -95,7 +95,7 @@ class GapInvest:
         self.STOP_LOSS = config['SETTINGS'].getfloat('STOP_LOSS')
         
         self.broker = mojito.KoreaInvestment(api_key=key, api_secret=api_secret, acc_no=account_no, mock=mock)
-        self.agent = tf.keras.models.load_model(model_path)
+        self.agent = tf.keras.models.load_model(config['MODEL']['PATH'])
         
         self.env = learn.MarketEnvironment(self.SYMBOL1+f".{self.TAG1}", self.SYMBOL2+f".{self.TAG1}", stockdata.today_before(14, tz='Asia/Seoul'), stockdata.today(tz='Asia/Seoul'),"5m")
         self.logger = None

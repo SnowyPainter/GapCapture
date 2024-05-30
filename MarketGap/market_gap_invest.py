@@ -6,7 +6,8 @@ import time
 import MarketGap.GapInvest as GapInvest
 from KEYS import *
 
-strategy1 = GapInvest.GapInvest(REAL_KEY, REAL_APISECRET, REAL_ACCOUNT_NO, False, "./hmsk.keras", "./hanmi_sk_settings.ini", "실전투자")
+strategy1 = GapInvest.GapInvest(REAL_KEY, REAL_APISECRET, REAL_ACCOUNT_NO, False, "./hanmi_sk_settings.ini", "실전투자")
+#strategy2 = GapInvest.GapInvest(REAL_KEY, REAL_APISECRET, REAL_ACCOUNT_NO, False, "./nepes_asic_settings.ini", "네패스 에이직 실전투자")
 
 #strategy1.run()
 
