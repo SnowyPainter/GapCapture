@@ -33,7 +33,7 @@ class GapInvest:
             quantity=qty
         )
         if resp['msg1'] == "주문가능금액을 초과 했습니다":
-            print("시장가 매매 주문 가능 금액 부족으로 지정가 매수")
+            self.logger.log("시장가 매매 주문 가능 금액 부족으로 지정가 매수")
             resp = self.broker.create_limit_buy_order(
                 symbol = symbol,
                 price = price,
