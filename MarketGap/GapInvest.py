@@ -22,15 +22,23 @@ class GapInvest:
             n = self.SELL_AMOUNT
         return n
     def get_amount_of_buy(self, curr_amount, stock_price):
-        n = math.floor((curr_amount * (1-self.FEE)) / stock_price)
+        n = math.floor((curr_amount * (1-self.FEE)) / (stock_price))
         if n > self.BUY_AMOUNT:
             n = self.BUY_AMOUNT
         return n
-    def buy_order(self, symbol, qty): #market price
+    def buy_order(self, symbol, qty, price): #market price
+        print(qty)
         resp = self.broker.create_market_buy_order(
             symbol=symbol,
             quantity=qty
         )
+        if resp['msg1'] == "주문가능금액을 초과 했습니다":
+            print("시장가 매매 주문 가능 금액 부족으로 지정가 매수")
+            resp = self.broker.create_limit_buy_order(
+                symbol = symbol,
+                price = price,
+                quantity = qty,
+            )
         pprint.pprint(resp)
         time.sleep(1)
     def sell_order(self, symbol, qty):
@@ -54,9 +62,9 @@ class GapInvest:
         df.set_index('Datetime', inplace=True)
         return df
     def buy(self, units, symbol, price):
-        self.buy_order(symbol, units)
+        self.buy_order(symbol, units, price)
         self.current_amount -= units * price * (1+self.FEE)
-        self.logger.log(f"BUY {symbol} - {units} / {price}")
+        self.logger.log(f"매수 주문 {symbol} - {units} / {price}")
         self.trades += 1
         return units
     def sell(self, symbol, price, loss):
@@ -66,7 +74,7 @@ class GapInvest:
             units = self.get_amount_of_sell(self.symbol2_units)
         self.sell_order(symbol, units)
         self.current_amount += units * price
-        self.logger.log(f"SOLD {symbol} - {units} / {price}, Profit : {loss}")
+        self.logger.log(f"시장가 매도 {symbol} - {units}, 예상 수익 : {loss}")
         self.trades += 1
         return units
     def create_logger(self, subtitle):
@@ -94,6 +102,7 @@ class GapInvest:
 
     def run(self):
         resp = self.broker.fetch_balance()
+        pprint.pprint(resp)
         stocks_qty = {}
         for stock in resp['output1']:
             stocks_qty[stock['pdno']] = int(stock['hldg_qty'])
