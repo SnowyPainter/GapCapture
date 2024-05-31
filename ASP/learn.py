@@ -47,9 +47,13 @@ class ASPEnvironment:
     
     def __init__(self, symbol1, symbol2, affective_symbol, start, end, interval):
         self.observation_space = observation_space(1)
+        self.logprofit_daybefore = 90
         self.action_space = action_space(3)
         self.symbols = [symbol1, symbol2]
         self.affective_symbol = affective_symbol + "_Price"
+        self.start = start 
+        self.end = end
+        self.interval = interval
         self.raw = stockdata.create_dataset(self.symbols, affective_symbol, start, end, interval)
         self._to_data()
         self.features = self.raw.columns
@@ -64,25 +68,30 @@ class ASPEnvironment:
     
     def reset(self):
         self.total_reward = 0
-        self.bar = 361
+        self.bar = self.logprofit_daybefore + 1
         state = self.normalized_data[self.features].iloc[self.bar-1:self.bar]
         return state.values
     
-    def append_raw(self, df):
+    def new_prices(self):
+        df = stockdata.create_dataset(self.symbols, self.affective_symbol, self.start, self.end, self.interval)
         self.raw = pd.concat([self.raw, df])
         self._to_data()
-    
+        return df
+        
     def step(self, action):
         correct = action == self._determin_to_trade(self.bar - 1, 0.2)
         reward = 1 if correct else 0
-        self.total_reward += reward
         state = self._get_state()
         
-        log_profit = np.log(self.raw[self.affective_symbol].iloc[self.bar] / self.raw[self.affective_symbol].shift(360).iloc[self.bar])
+        log_profit = np.log(self.raw[self.affective_symbol].iloc[self.bar] / self.raw[self.affective_symbol].shift(self.logprofit_daybefore).iloc[self.bar])
         if log_profit < 0 and action == 0: 
-            reward += 1
-        elif log_profit > 0 and (action != 0):
-            reward += 1
+            reward += 0.3
+        elif log_profit > 0.3 and action != 0:
+            reward += 0.7
+        elif log_profit > 0 and action == 0:
+            reward = 0
+        
+        self.total_reward += reward
         
         if self.bar >= len(self.normalized_data):
             done = True

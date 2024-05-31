@@ -92,7 +92,7 @@ class Strategy1:
                     self.current_balance += sell(units, prices[1], self.fee)
             
             if action == 0:
-                print(f"홀딩 {self.current_balance}")
+                print(f"홀딩 {self.current_balance}, {prices}")
             if action != 0:
                 if action == 1:
                     if self.symbol2_units > 0:
