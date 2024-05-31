@@ -37,8 +37,6 @@ class action_space:
 
 class ASPEnvironment:
     def _to_data(self):
-        lr = np.log(self.raw[self.affective_symbol] / self.raw[self.affective_symbol].shift(360))
-        self.raw[self.affective_symbol+"_LR"] = lr
         mean, std = self.raw.mean(), self.raw.std()
         self.normalized_data = (self.raw - mean) / std
         
@@ -77,12 +75,12 @@ class ASPEnvironment:
     def step(self, action):
         correct = action == self._determin_to_trade(self.bar - 1, 0.2)
         reward = 1 if correct else 0
-        
         self.total_reward += reward
-        
         state = self._get_state()
-        print(state.iloc[0][3], self.raw[self.affective_symbol].iloc[self.bar], self.raw[self.affective_symbol].shift(360).iloc[self.bar])
-        print(np.log(self.raw[self.affective_symbol].iloc[self.bar] - self.raw[self.affective_symbol].shift(360).iloc[self.bar]))
+        
+        log_profit = np.log(self.raw[self.affective_symbol].iloc[self.bar] / self.raw[self.affective_symbol].shift(360).iloc[self.bar])
+        if log_profit < 0 and action == 0: 
+            reward += 1
         info = {}
         
         if self.bar >= len(self.normalized_data):
