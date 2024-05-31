@@ -50,7 +50,7 @@ class ASPEnvironment:
         self.logprofit_daybefore = 90
         self.action_space = action_space(3)
         self.symbols = [symbol1, symbol2]
-        self.affective_symbol = affective_symbol + "_Price"
+        self.affective_symbol = affective_symbol
         self.start = start 
         self.end = end
         self.interval = interval
@@ -83,7 +83,7 @@ class ASPEnvironment:
         reward = 1 if correct else 0
         state = self._get_state()
         
-        log_profit = np.log(self.raw[self.affective_symbol].iloc[self.bar] / self.raw[self.affective_symbol].shift(self.logprofit_daybefore).iloc[self.bar])
+        log_profit = np.log(self.raw[self.affective_symbol + "_Price"].iloc[self.bar] / self.raw[self.affective_symbol + "_Price"].shift(self.logprofit_daybefore).iloc[self.bar])
         if log_profit < 0 and action == 0: 
             reward += 0.3
         elif log_profit > 0.3 and action != 0:

@@ -13,7 +13,7 @@ import pandas as pd
 import log
 import readini
 
-class GapInvest:
+class ASPInvest:
     def reshape(self, state):
         return np.reshape(state, [1, 1, 3])
     def get_amount_of_sell(self, curr_units):
@@ -64,13 +64,13 @@ class GapInvest:
         self.trades += 1
         return units
     def create_logger(self, subtitle):
-        self.logger = log.Logger(f"{self.config["NAME1"]}, {self.config["NAME2"]}", subtitle)
+        self.logger = log.Logger(f"{self.config['NAME1']}, {self.config['NAME2']}", subtitle)
     def __init__(self, key, api_secret, account_no, mock, settings, subtitle=""):
         self.config = readini.read(settings)
         self.broker = mojito.KoreaInvestment(api_key=key, api_secret=api_secret, acc_no=account_no, mock=mock)
         self.agent = tf.keras.models.load_model(self.config['MODEL'])
         
-        self.env = learn.ASPEnvironment(self.config["CODE1"]+f".{self.config["TAG1"]}", self.config["CODE2"]+f".{self.config["TAG2"]}", stockdata.today_before(14, tz='Asia/Seoul'), stockdata.today(tz='Asia/Seoul'),"5m")
+        self.env = learn.ASPEnvironment(self.config["CODE1"]+f".{self.config['TAG1']}", self.config["CODE2"]+f".{self.config['TAG2']}", self.config['AFFECTIVE'], stockdata.today_before(14, tz='Asia/Seoul'), stockdata.today(tz='Asia/Seoul'),"5m")
         self.logger = None
         self.trades = 0
         self.subtitle = subtitle
@@ -88,7 +88,7 @@ class GapInvest:
         self.create_logger(subtitle=self.subtitle)
         self.logger.log(f"평가 : {self.evaluate_amount}")
         self.logger.log(f"예수금 : {self.current_amount}")
-        self.logger.log(f"보유 종목 : {self.config["NAME1"]}({self.symbol1_units}), {self.config["NAME2"]}({self.symbol2_units})")            
+        self.logger.log(f"보유 종목 : {self.config['NAME1']}({self.symbol1_units}), {self.config['NAME2']}({self.symbol2_units})")            
         while True:
             now = datetime.now()
 
@@ -114,7 +114,7 @@ class GapInvest:
 
             action = np.argmax(self.agent.predict(state, verbose=0)[0, 0])
             if action == 0:
-                self.logger.log(f"Holding, {self.config["CODE1"]}: {self.symbol1_units}, {self.config["CODE2"]}: {self.symbol2_units}")
+                self.logger.log(f"Holding, {self.config['CODE1']}: {self.symbol1_units}, {self.config['CODE2']}: {self.symbol2_units}")
             else:
                 if action == 1:
                     if self.symbol2_units > 0:
@@ -123,7 +123,7 @@ class GapInvest:
                     if units > 0:
                         self.symbol1_units += self.buy(units, self.config["CODE1"], symbol1_price)
                     else:
-                        self.logger.log(f"No Money to buy {self.config["CODE1"]} - {self.current_amount} / {symbol1_price}")
+                        self.logger.log(f"No Money to buy {self.config['CODE1']} - {self.current_amount} / {symbol1_price}")
                 elif action == 2:
                     if self.symbol1_units > 0:
                         self.symbol1_units -= self.sell(self.config["CODE1"], symbol1_price, symbol1_loss)
@@ -131,7 +131,7 @@ class GapInvest:
                     if units > 0:
                         self.symbol2_units += self.buy(units, self.config["CODE2"], symbol2_price)
                     else:
-                        self.logger.log(f"No Money to buy {self.config["CODE2"]} - {self.current_amount} / {symbol2_price}")
+                        self.logger.log(f"No Money to buy {self.config['CODE2']} - {self.current_amount} / {symbol2_price}")
             
             if now.hour >= 15 and now.minute >= 30:
                 self.logger.log(f"End Trade, Trades:{self.trades}")
