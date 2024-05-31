@@ -4,6 +4,9 @@ def read(fname):
     config = configparser.ConfigParser()
     config.read(fname)
     return {
+        "AFFECTIVE" : config["AFFECTIVE"]["CODE"],
+        "AF_BUY_THRESHOLD" : config["AFFECTIVE"]["BT"],
+        "AF_SELL_THRESHOLD" : config["AFFECTIVE"]["ST"],
         "MODEL" : config["MODEL"]["PATH"],
         "TAG1" : config['SETTINGS']['SYMBOL1_TAG'],
         "TAG2" : config['SETTINGS']['SYMBOL2_TAG'],
@@ -15,5 +18,5 @@ def read(fname):
         "NAME2" : config['SETTINGS']['SYMBOL2_NAME'],
         "FEE" : config['SETTINGS'].getfloat('FEE'),
         "TAKE_PROFIT" : config['SETTINGS'].getfloat('TAKE_PROFIT'),
-        "STOP_LOSS" : config['SETTINGS'].getfloat('STOP_LOSS')
+        "STOP_LOSS" : config['SETTINGS'].getfloat('STOP_LOSS'),
     }
