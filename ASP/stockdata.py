@@ -3,6 +3,8 @@ import yfinance as yf
 import pytz
 from datetime import datetime, timedelta, time
 
+import pprint
+
 def today(tz = 'America/New_York'):
     return datetime.now(pytz.timezone(tz))
 def today_before(day, tz = 'America/New_York'):

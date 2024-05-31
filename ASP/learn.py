@@ -72,8 +72,7 @@ class ASPEnvironment:
         state = self.normalized_data[self.features].iloc[self.bar-1:self.bar]
         return state.values
     
-    def new_prices(self):
-        df = stockdata.create_dataset(self.symbols, self.affective_symbol, self.start, self.end, self.interval)
+    def append_raw(self, df):
         self.raw = pd.concat([self.raw, df])
         self._to_data()
         return df
