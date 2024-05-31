@@ -81,13 +81,14 @@ class ASPEnvironment:
         log_profit = np.log(self.raw[self.affective_symbol].iloc[self.bar] / self.raw[self.affective_symbol].shift(360).iloc[self.bar])
         if log_profit < 0 and action == 0: 
             reward += 1
-        info = {}
+        elif log_profit > 0 and (action != 0):
+            reward += 1
         
         if self.bar >= len(self.normalized_data):
             done = True
         else:
             done = False
-        
+        info = {}
         self.bar += 1
         
         return state.values, reward, done, info
@@ -143,7 +144,7 @@ class DQNAgent:
             for time in range(self.max_steps):
                 action = self.act(state)
                 next_state, reward, done, _ = self.env.step(action)
-                if len(next_state) == 0:
+                if self.env.bar == len(self.env.normalized_data):
                     done = True
                 else:
                     next_state = np.reshape(next_state, [1, self.state_size, len(self.env.features)])
