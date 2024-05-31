@@ -5,8 +5,8 @@ def read(fname):
     config.read(fname)
     return {
         "AFFECTIVE" : config["AFFECTIVE"]["CODE"],
-        "AF_BUY_THRESHOLD" : config["AFFECTIVE"]["BT"],
-        "AF_SELL_THRESHOLD" : config["AFFECTIVE"]["ST"],
+        "AF_BUY_THRESHOLD" : config["AFFECTIVE"].getfloat("BT"),
+        "AF_SELL_THRESHOLD" : config["AFFECTIVE"].getfloat("ST"),
         "MODEL" : config["MODEL"]["PATH"],
         "TAG1" : config['SETTINGS']['SYMBOL1_TAG'],
         "TAG2" : config['SETTINGS']['SYMBOL2_TAG'],
