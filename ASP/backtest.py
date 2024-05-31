@@ -25,6 +25,9 @@ def buy(units, price, fee):
 
 class Strategy1:
     
+    def set_affective_entry_price(self, price):
+        self.affective_entry_price += price
+        self.affective_entry_price /= (1 if self.affective_entry_price == 0 else 2)
     def set_entry_price_symbol1(self, units, new_prices):
         self.entry_price_symbol1 += units * new_prices
         self.entry_price_symbol1 /= (1 if self.entry_price_symbol1 == 0 else (units + 1))
@@ -56,6 +59,9 @@ class Strategy1:
         
         self.entry_price_symbol1 = 0
         self.entry_price_symbol2 = 0
+        prices = self.get_price(bar)
+        self.affective_entry_price = prices[2]
+        refresh_affective_entry = 24
         
         while bar < len(self.env.normalized_data) - 1:
             prices = self.get_price(bar)
@@ -67,9 +73,39 @@ class Strategy1:
             # symbol 2 buy, symbol 1 sell
             # if 0 -> hold
             
+            if bar % refresh_affective_entry == 0:
+                self.set_affective_entry_price(prices[2])
+            
             symbol1_loss = ((prices[0] - self.entry_price_symbol1) / self.entry_price_symbol1) if self.entry_price_symbol1 != 0 else 0
             symbol2_loss = ((prices[1] - self.entry_price_symbol2) / self.entry_price_symbol2) if self.entry_price_symbol2 != 0 else 0
-            
+            affective_loss = ((prices[2] - self.affective_entry_price) / self.affective_entry_price) if self.affective_entry_price != 0 else 0
+            if affective_loss < -0.03:
+                units = get_units_of_sell(self.symbol1_units)
+                if units > 0:
+                    print(f"affective low sell {symbol1_loss}")
+                self.symbol1_units -= units
+                self.current_balance += sell(units, prices[0], self.fee)
+                units = get_units_of_sell(self.symbol2_units)
+                if units > 0:
+                    print(f"affective low sell {symbol2_loss}")
+                self.symbol2_units -= units
+                self.current_balance += sell(units, prices[1], self.fee)
+            elif affective_loss > 0.02:
+                units = get_units_of_buy(self.current_balance, prices[0])
+                if units > 0:
+                    self.set_affective_entry_price(prices[2])
+                    self.set_entry_price_symbol1(units, prices[0])
+                    print(f"affective high buy")
+                    self.symbol1_units += units
+                    self.current_balance -= buy(units, prices[0], self.fee)
+                units = get_units_of_buy(self.current_balance, prices[1])
+                if units > 0:
+                    self.set_affective_entry_price(prices[2])
+                    self.set_entry_price_symbol1(units, prices[1])
+                    print(f"affective high buy")
+                    self.symbol2_units += units
+                    self.current_balance -= buy(units, prices[1], self.fee)
+                
             if self.symbol1_units > 0:
                 units = get_units_of_sell(self.symbol1_units)
                 if symbol1_loss > 0.035: #tp
@@ -104,6 +140,7 @@ class Strategy1:
                             self.entry_price_symbol2 = 0
                     units = get_units_of_buy(self.current_balance, prices[0])
                     if units > 0:
+                        self.set_affective_entry_price(prices[2])
                         self.set_entry_price_symbol1(units, prices[0])
                         print(f"symbol1 {units} 매수 {self.current_balance} 평단 : {self.entry_price_symbol1}")
                         self.symbol1_units += units
@@ -118,6 +155,7 @@ class Strategy1:
                             self.entry_price_symbol1 = 0
                     units = get_units_of_buy(self.current_balance, prices[1])
                     if units > 0:
+                        self.set_affective_entry_price(prices[2])
                         self.set_entry_price_symbol2(units, prices[1])
                         print(f"symbol2 {units} 매수 {self.current_balance} 평단 : {self.entry_price_symbol2}")
                         self.symbol2_units += units

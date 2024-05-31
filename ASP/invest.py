@@ -63,6 +63,23 @@ class ASPInvest:
         self.logger.log(f"시장가 매도 {symbol} - {units}, 예상 수익 : {loss}")
         self.trades += 1
         return units
+    def batch_sell(self, symbol1_price, symbol2_price, symbol1_loss, symbol2_loss):
+        if self.symbol1_units > 0:
+            self.symbol1_units -= self.sell(self.config["CODE1"], symbol1_price, symbol1_loss)
+        if self.symbol2_units > 0:
+            self.symbol2_units -= self.sell(self.config["CODE2"], symbol2_price, symbol2_loss)
+    def batch_buy(self, symbol1_price, symbol2_price):
+        units = self.get_amount_of_buy(self.current_amount, symbol1_price)
+        if units > 0:
+            self.symbol1_units += self.buy(units, self.config["CODE1"], symbol1_price)
+        else:
+            self.logger.log(f"[AFFECTIVE BUY] Lack of Money {self.config['CODE1']} - {self.current_amount} / {symbol1_price}")
+        units = self.get_amount_of_buy(self.current_amount, symbol2_price)
+        if units > 0:
+            self.symbol2_units += self.buy(units, self.config["CODE2"], symbol2_price)
+        else:
+            self.logger.log(f"[AFFECTIVE BUY] Lack of Money {self.config['CODE2']} - {self.current_amount} / {symbol2_price}")
+        
     def create_logger(self, subtitle):
         self.logger = log.Logger(f"{self.config['NAME1']}, {self.config['NAME2']}", subtitle)
     def __init__(self, key, api_secret, account_no, mock, settings, subtitle=""):
@@ -89,6 +106,9 @@ class ASPInvest:
         self.logger.log(f"평가 : {self.evaluate_amount}")
         self.logger.log(f"예수금 : {self.current_amount}")
         self.logger.log(f"보유 종목 : {self.config['NAME1']}({self.symbol1_units}), {self.config['NAME2']}({self.symbol2_units})")            
+        prices = self.env.new_prices() 
+        self.affective_entry_price = prices[2]
+        
         while True:
             now = datetime.now()
 
@@ -104,6 +124,14 @@ class ASPInvest:
 
             symbol1_loss = ((symbol1_price - avgp[self.config["CODE1"]]) / avgp[self.config["CODE1"]]) if avgp[self.config["CODE1"]] != 0 else 0
             symbol2_loss = ((symbol2_price - avgp[self.config["CODE2"]]) / avgp[self.config["CODE2"]]) if avgp[self.config["CODE2"]] != 0 else 0
+            affective_loss = ((prices[2] - self.affective_entry_price) / self.affective_entry_price) if self.affective_entry_price != 0 else 0
+            
+            #Affective System
+            
+            if affective_loss > self.config["AF_BUY_THRESHOLD"]:
+                self.batch_buy(symbol1_price, symbol2_price)
+            elif affective_loss < self.config["AF_SELL_THRESHOLD"]:
+                self.batch_sell(symbol1_price, symbol2_price, symbol1_loss, symbol2_loss)
             
             if self.symbol1_units > 0:
                 if symbol1_loss >= self.config["TAKE_PROFIT"] or symbol1_loss <= self.config["STOP_LOSS"]:

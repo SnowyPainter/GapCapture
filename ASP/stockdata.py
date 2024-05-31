@@ -16,7 +16,7 @@ def merge_dfs(dfs, on):
 
 def merge_without_on(df1, df2, nan_column):
     merged = df1.merge(df2, left_index=True, right_index=True, how='left')
-    for i in range(1, len(df2)+1):
+    for i in range(1, (len(merged) if len(merged) <= len(df2) else len(df2))+1):
         merged[nan_column][-i] = df2[nan_column][-i]
     return merged
 
