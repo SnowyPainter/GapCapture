@@ -4,6 +4,7 @@ def read(fname):
     config = configparser.ConfigParser()
     config.read(fname)
     return {
+        "MODEL" : config["MODEL"]["PATH"],
         "TAG1" : config['SETTINGS']['SYMBOL1_TAG'],
         "TAG2" : config['SETTINGS']['SYMBOL2_TAG'],
         "SELL_AMOUNT" : config['SETTINGS'].getint('SELL_AMOUNT'),
