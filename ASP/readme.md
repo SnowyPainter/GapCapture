@@ -46,4 +46,5 @@ Days of Trade : 20
 ----
 > With **Affective System**  
 Max Profit : 20%  
-End Profit : 12%
+End Profit : 12%  
+Affective System's Contribution : 10.57%
