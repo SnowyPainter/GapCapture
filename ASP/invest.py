@@ -155,14 +155,14 @@ class ASPInvest:
             #Affective System
             if affective_loss > self.config["AF_BUY_THRESHOLD"]:
                 self.batch_buy(symbol1_price, symbol2_price, prices[2])
-            elif affective_loss < self.config["AF_SELL_THRESHOLD"]:
-                self.batch_sell(symbol1_price, symbol2_price, symbol1_loss, symbol2_loss, prices[2])
+            #elif affective_loss < self.config["AF_SELL_THRESHOLD"]:
+            #    self.batch_sell(symbol1_price, symbol2_price, symbol1_loss, symbol2_loss, prices[2])
             
             if self.symbol1_units > 0:
-                if symbol1_loss >= self.config["TAKE_PROFIT"] or symbol1_loss <= self.config["STOP_LOSS"]:
+                if symbol1_loss >= self.config["TAKE_PROFIT"]: #or symbol1_loss <= self.config["STOP_LOSS"]:
                     self.symbol1_units -= self.sell(self.config["CODE1"], symbol1_price, symbol1_loss)
             if self.symbol2_units > 0:
-                if symbol2_loss >= self.config["TAKE_PROFIT"] or symbol2_loss <= self.config["STOP_LOSS"]:
+                if symbol2_loss >= self.config["TAKE_PROFIT"]: #or symbol2_loss <= self.config["STOP_LOSS"]:
                     self.symbol2_units -= self.sell(self.config["CODE2"], symbol2_price, symbol2_loss)
 
             action = np.argmax(self.agent.predict(state, verbose=0)[0, 0])

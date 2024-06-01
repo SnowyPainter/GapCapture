@@ -80,7 +80,7 @@ class Strategy1:
                 if symbol1_loss > 0.035: #tp
                     print(f"이익 초과 symbol1 {units} / {symbol1_loss} 매도")
                     self.symbol1_units -= self._sell(units, prices[0])
-                elif symbol1_loss < -0.045:
+                elif symbol1_loss < -0.045 and False:
                     print(f"손절 symbol1 {units} / {symbol1_loss} 매도")
                     self.symbol1_units -= self._sell(units, prices[0])
             if self.symbol2_units > 0:
@@ -88,7 +88,7 @@ class Strategy1:
                 if symbol2_loss > 0.035:
                     print(f"이익 초과 symbol2 {units} / {symbol2_loss} 매도")
                     self.symbol2_units -= self._sell(units, prices[1])
-                elif symbol2_loss < -0.045:
+                elif symbol2_loss < -0.045 and False:
                     print(f"손절 symbol2 {units} / {symbol2_loss} 매도")
                     self.symbol2_units -= self._sell(units, prices[1])
             

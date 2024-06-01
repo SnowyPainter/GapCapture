@@ -25,16 +25,3 @@ Affective System is react and trade by the third stock's price.
 > ASP references Nvidia price. When DQN learning, Nvidia's log profit is calculated and it is applied while rewarding. So, Net wealth chart looks following Nvidia's chart.  
 > With *Affective System*, even AI orders 'hold', We already know if the related stock, *Affected Stock*, goes up, then both of stock pair's elements would rise.  
 > The moment that *Affected System* works could be seemed to nosiy. Look at the points that net wealth cross over Nvidia. The System know in advance and reacts Nvidia would rise or fall.
-
-## Reinforce learning Feeding system
-``` python
-logprofit_shift = 90
-reward = 1 if correct else 0
-
-if log_profit < 0 and action == 0: 
-    reward += 0.3
-elif log_profit > 0.3 and action != 0:
-    reward += 0.7
-elif log_profit > 0 and action == 0:
-    reward = 0
-```

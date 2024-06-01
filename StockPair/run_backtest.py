@@ -27,6 +27,9 @@ print(stgy.net_wealths[-1] / amount)
 nvda = stockdata.create_dataset(["nvda"], stockdata.today_before(50), stockdata.today(),"5m")
 df = pd.DataFrame({"NetWealth" : stgy.net_wealths, "Nvda" : nvda["nvda_Price"].iloc[len(nvda) - len(stgy.net_wealths):]})
 df = stockdata.normalize(df)
+
+print(df.corr())
+
 plt.plot(df["NetWealth"], label = "Net Wealth")
 plt.plot(df["Nvda"], label="Nvda")
 plt.legend()

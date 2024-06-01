@@ -47,7 +47,7 @@ class ASPEnvironment:
     
     def __init__(self, symbol1, symbol2, affective_symbol, start, end, interval):
         self.observation_space = observation_space(1)
-        self.logprofit_daybefore = 90
+        self.logprofit_daybefore = 48
         self.action_space = action_space(3)
         self.symbols = [symbol1, symbol2]
         self.affective_symbol = affective_symbol
@@ -83,10 +83,15 @@ class ASPEnvironment:
         state = self._get_state()
         
         log_profit = np.log(self.raw[self.affective_symbol + "_Price"].iloc[self.bar] / self.raw[self.affective_symbol + "_Price"].shift(self.logprofit_daybefore).iloc[self.bar])
-        if log_profit < 0 and action == 0: 
-            reward += 0.1
+        
+        if log_profit < 0 and action == 0:
+            reward += 0.4
         elif log_profit > 0.3 and action != 0:
-            reward += 0.8
+            reward += 0.7
+        elif log_profit > 0.2 and action != 0:
+            reward += 0.5
+        elif log_profit > 0.05 and action != 0:
+            reward += 0.2
         elif log_profit > 0 and action == 0:
             reward = 0
         

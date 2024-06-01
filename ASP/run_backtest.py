@@ -27,6 +27,8 @@ df = pd.DataFrame({"NetWealth":stgy.net_wealths, "Nvda": env.raw["NVDA_Price"].i
 mean, std = df.mean(), df.std()
 df = (df-mean) / std
 
+print(df.corr())
+
 plt.plot(df["NetWealth"], label="Net Wealth")
 plt.plot(df["Nvda"], label="Nvda Price")
 plt.legend()
