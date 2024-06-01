@@ -19,6 +19,8 @@ env = learn.MarketEnvironment(symbol1, symbol2, stockdata.today_before(50), stoc
 amount = 100000000
 stgy = backtest.Strategy1(env, amount, 0.0025, config["MODEL"]["PATH"])
 stgy.test()
+print("Best ", (max(stgy.net_wealths) - amount) / amount)
+print("Worst ", (min(stgy.net_wealths) - amount) / amount)
 print(stgy.net_wealths[-1] / amount)
 
 nvda = stockdata.create_dataset(["nvda"], stockdata.today_before(50), stockdata.today(),"5m")
