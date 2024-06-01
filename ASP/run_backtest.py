@@ -18,6 +18,7 @@ env = learn.ASPEnvironment(symbol1, symbol2, config["AFFECTIVE"], stockdata.toda
 amount = 100000000
 stgy = backtest.Strategy1(env, amount, 0.0025, config["MODEL"])
 stgy.run()
+print((stgy.affective_system_profit_sum / stgy.net_wealths[-1]))
 print((stgy.net_wealths[-1] - amount) / amount)
 print("Best ", (max(stgy.net_wealths) - amount) / amount)
 print("Worst ", (min(stgy.net_wealths) - amount) / amount)

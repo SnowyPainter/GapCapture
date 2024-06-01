@@ -63,6 +63,10 @@ class Strategy1:
         self.affective_entry_price = prices[2]
         refresh_affective_entry = 24
         
+        self.affective_system_profit_sum = 0
+        self.affective_system_buy = 0
+        self.affective_system_sell = 0
+        
         while bar < len(self.env.normalized_data) - 1:
             prices = self.get_price(bar)
             state = reshape(np.array([self.env.get_state(bar)]))
@@ -83,13 +87,19 @@ class Strategy1:
                 units = get_units_of_sell(self.symbol1_units)
                 if units > 0:
                     print(f"affective low sell {symbol1_loss}")
-                self.symbol1_units -= units
-                self.current_balance += sell(units, prices[0], self.fee)
+                    self.symbol1_units -= units
+                    profit = sell(units, prices[0], self.fee)
+                    self.affective_system_profit_sum += profit
+                    self.affective_system_sell += 1
+                    self.current_balance += profit
                 units = get_units_of_sell(self.symbol2_units)
                 if units > 0:
                     print(f"affective low sell {symbol2_loss}")
-                self.symbol2_units -= units
-                self.current_balance += sell(units, prices[1], self.fee)
+                    self.symbol2_units -= units
+                    profit = sell(units, prices[1], self.fee)
+                    self.affective_system_profit_sum += profit
+                    self.affective_system_sell += 1
+                    self.current_balance += profit
             elif affective_loss > 0.02:
                 units = get_units_of_buy(self.current_balance, prices[0])
                 if units > 0:
@@ -97,36 +107,57 @@ class Strategy1:
                     self.set_entry_price_symbol1(units, prices[0])
                     print(f"affective high buy")
                     self.symbol1_units += units
-                    self.current_balance -= buy(units, prices[0], self.fee)
+                    cost = buy(units, prices[0], self.fee)
+                    self.affective_system_profit_sum -= cost
+                    self.current_balance -= cost
+                    self.affective_system_buy += 1
                 units = get_units_of_buy(self.current_balance, prices[1])
                 if units > 0:
                     self.set_affective_entry_price(prices[2])
                     self.set_entry_price_symbol1(units, prices[1])
                     print(f"affective high buy")
                     self.symbol2_units += units
-                    self.current_balance -= buy(units, prices[1], self.fee)
-                
+                    cost = buy(units, prices[1], self.fee)
+                    self.affective_system_profit_sum -= cost
+                    self.current_balance -= cost 
+                    self.affective_system_buy += 1
+                    
             if self.symbol1_units > 0:
                 units = get_units_of_sell(self.symbol1_units)
                 if symbol1_loss > 0.035: #tp
                     print(f"이익 초과 symbol1 {units} / {symbol1_loss} 매도")
                     self.symbol1_units -= units
-                    self.current_balance += sell(units, prices[0], self.fee)
+                    profit = sell(units, prices[0], self.fee)
+                    self.current_balance += profit
+                    if self.affective_system_buy > 0:
+                        self.affective_system_profit_sum += profit
+                        self.affective_system_sell += 1
                 elif symbol1_loss < -0.045:
                     print(f"손절 symbol1 {units} / {symbol1_loss} 매도")
                     self.symbol1_units -= units
-                    self.current_balance += sell(units, prices[0], self.fee)
+                    profit = sell(units, prices[0], self.fee)
+                    self.current_balance += profit 
+                    if self.affective_system_buy > 0:
+                        self.affective_system_profit_sum += profit
+                        self.affective_system_sell += 1
             if self.symbol2_units > 0:
                 units = get_units_of_sell(self.symbol2_units)
                 if symbol2_loss > 0.035:
                     print(f"이익 초과 symbol2 {units} / {symbol2_loss} 매도")
                     self.symbol2_units -= units
-                    self.current_balance += sell(units, prices[1], self.fee)
+                    profit = sell(units, prices[1], self.fee)
+                    self.current_balance += profit
+                    if self.affective_system_buy > 0:
+                        self.affective_system_profit_sum += profit
+                        self.affective_system_sell += 1
                 elif symbol2_loss < -0.045:
                     print(f"손절 symbol2 {units} / {symbol2_loss} 매도")
                     self.symbol2_units -= units
-                    self.current_balance += sell(units, prices[1], self.fee)
-            
+                    profit = sell(units, prices[1], self.fee)
+                    self.current_balance += profit
+                    if self.affective_system_buy > 0:
+                        self.affective_system_profit_sum += profit
+                        self.affective_system_sell += 1
             if action == 0:
                 print(f"홀딩 {self.current_balance}, {prices}")
             if action != 0:
@@ -135,7 +166,11 @@ class Strategy1:
                         units = get_units_of_sell(self.symbol2_units)
                         print(f"symbol2 {units} 매도 {self.current_balance}")
                         self.symbol2_units -= units
-                        self.current_balance += sell(units, prices[1], self.fee)
+                        profit = sell(units, prices[1], self.fee)
+                        if self.affective_system_buy > 0:
+                            self.affective_system_profit_sum += profit
+                            self.affective_system_sell += 1
+                        self.current_balance += profit
                         if self.symbol2_units <= 0:
                             self.entry_price_symbol2 = 0
                     units = get_units_of_buy(self.current_balance, prices[0])
@@ -143,14 +178,23 @@ class Strategy1:
                         self.set_affective_entry_price(prices[2])
                         self.set_entry_price_symbol1(units, prices[0])
                         print(f"symbol1 {units} 매수 {self.current_balance} 평단 : {self.entry_price_symbol1}")
+                        cost = buy(units, prices[0], self.fee)
                         self.symbol1_units += units
-                        self.current_balance -= buy(units, prices[0], self.fee)
+                        if self.affective_system_sell > 0 and self.affective_system_buy > self.affective_system_sell:
+                            self.affective_system_profit_sum -= cost
+                            self.affective_system_buy += 1
+                        self.current_balance -= cost 
+                        
                 elif action == 2:
                     if self.symbol1_units > 0:
                         units = get_units_of_sell(self.symbol1_units)
                         print(f"symbol1 {units} 매도 {self.current_balance}")
                         self.symbol1_units -= units
-                        self.current_balance += sell(units, prices[0], self.fee)
+                        profit = sell(units, prices[0], self.fee)
+                        self.current_balance += profit 
+                        if self.affective_system_buy > 0:
+                            self.affective_system_profit_sum += profit
+                            self.affective_system_sell += 1
                         if self.symbol1_units <= 0:
                             self.entry_price_symbol1 = 0
                     units = get_units_of_buy(self.current_balance, prices[1])
@@ -159,11 +203,21 @@ class Strategy1:
                         self.set_entry_price_symbol2(units, prices[1])
                         print(f"symbol2 {units} 매수 {self.current_balance} 평단 : {self.entry_price_symbol2}")
                         self.symbol2_units += units
-                        self.current_balance -= buy(units, prices[1], self.fee)
+                        cost = buy(units, prices[1], self.fee)
+                        self.current_balance -= cost
+                        if self.affective_system_sell > 0 and self.affective_system_buy > self.affective_system_sell:
+                            self.affective_system_profit_sum -= cost
+                            self.affective_system_buy += 1
             
             nw = self.symbol1_units * prices[0] + self.symbol2_units * prices[1] + self.current_balance
             #print(nw)
             self.net_wealths.append(nw)
             self.units = self.symbol1_units + self.symbol2_units
-    
+            print("AFFECTIVE SYSTEM PROFIT SUM : ", self.affective_system_profit_sum)
+            print(self.affective_system_buy, self.affective_system_sell)
             bar += 1
+            
+        remain =  self.affective_system_buy - self.affective_system_sell
+        if remain > 0:
+            self.affective_system_profit_sum += (self.symbol1_units * prices[0] + self.symbol2_units * prices[1])
+        print("AFFECTIVE SYSTEM PROFIT SUM : ", self.affective_system_profit_sum)
