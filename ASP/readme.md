@@ -38,13 +38,3 @@ elif log_profit > 0.3 and action != 0:
 elif log_profit > 0 and action == 0:
     reward = 0
 ```
-### SK Hynix with Hanmi Semiconductor, with the affective stock is Nvidia
-> Without **Affective System**
-Max Profit : 15%  
-End Profit : 10%  
-Days of Trade : 20  
-----
-> With **Affective System**  
-Max Profit : 20%  
-End Profit : 12%  
-Affective System's Contribution : 10.57%
