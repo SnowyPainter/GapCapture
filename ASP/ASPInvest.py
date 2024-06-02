@@ -6,8 +6,8 @@ import time
 import invest
 from KEYS import *
 
-strategy1 = invest.ASPInvest(REAL_KEY, REAL_APISECRET, REAL_ACCOUNT_NO, False, "./hanmi_sk_settings.ini", "실전투자")
-#strategy2 = invest.ASPInvest(REAL_KEY, REAL_APISECRET, REAL_ACCOUNT_NO, False, "./nepes_asic_settings.ini", "네패스 에이직 실전투자")
+strategy1 = invest.ASPInvest(REAL_KEY, REAL_APISECRET, REAL_ACCOUNT_NO, False, "./hanmi_sk_settings.ini", True, False,"실전투자")
+#strategy1 = invest.ASPInvest(REAL_KEY, REAL_APISECRET, REAL_ACCOUNT_NO, False, "./nepes_asic_settings.ini", False, False, "네패스 에이직 실전투자")
 
 #strategy1.run()
 

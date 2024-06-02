@@ -12,6 +12,7 @@ import json
 import pandas as pd
 import log
 import readini
+import pytz, os
 
 class ASPInvest:
     def _create_standard_df(self, prices):
@@ -23,16 +24,25 @@ class ASPInvest:
         df['Datetime'] = [pd.to_datetime(stockdata.today(tz='Asia/Seoul'), format="%Y-%m-%d %H:%M:%S%z")]
         df.set_index('Datetime', inplace=True)
         return df
-    def _create_now_data(self, krx_symbols, affective, is_affective_nyse):
+    def _create_now_data(self, symbols, affective, is_symbols_nyse ,is_affective_nyse):
         prices = []
-        if not is_affective_nyse:
-            krx_symbols.append(affective)
-        for symbol in krx_symbols:
-            resp = self.broker.fetch_price(symbol)
-            prices.append(float(resp['output']['stck_prpr']))
-        if is_affective_nyse:
+        if is_symbols_nyse and is_affective_nyse:
+            symbols = symbols.append(affective)
+            for symbol in symbols:
+                resp = self.nyse_broker.fetch_price(symbol)
+                prices.append(float(resp['output']['last']))
+        elif not is_symbols_nyse and is_affective_nyse:
+            for symbol in symbols:
+                resp = self.broker.fetch_price(symbol)
+                prices.append(float(resp['output']['stck_prpr']))    
             resp = self.nyse_broker.fetch_price(affective)
             prices.append(float(resp['output']['last']))
+        elif is_symbols_nyse and not is_affective_nyse:
+            for symbol in symbols:
+                resp = self.nyse_broker.fetch_price(symbol)
+                prices.append(float(resp['output']['last']))
+            resp = self.broker.fetch_price(affective)
+            prices.append(float(resp['output']['stck_prpr']))
         return prices
     
     def reshape(self, state):
@@ -48,14 +58,38 @@ class ASPInvest:
         if n > self.config["BUY_AMOUNT"]:
             n = self.config["BUY_AMOUNT"]
         return n
+    def get_balance(self):
+        if self.is_symbol_nyse:
+            broker = self.nyse_broker
+            resp = broker.fetch_present_balance()
+            print(resp)
+            amount = resp['output2']['frcr_dncl_amt_2']
+            stocks_qty = {}
+            avgp = {self.config["CODE1"]:0, self.config["CODE2"]:0}
+            
+        else:
+            broker = self.broker
+            resp = broker.fetch_balance()
+            amount = int(resp['output2'][0]['prvs_rcdl_excc_amt'])
+            stocks_qty = {}
+            for stock in resp['output1']:
+                stocks_qty[stock['pdno']] = int(stock['hldg_qty'])
+            avgp = {self.config["CODE1"]:0, self.config["CODE2"]:0}
+            for stock in resp['output1']:
+                avgp[stock['pdno']] = float(stock['pchs_avg_pric'])
+        return amount, stocks_qty, avgp
     def buy_order(self, symbol, qty, price): #market price
-        resp = self.broker.create_market_buy_order(
+        broker = self.broker
+        if self.is_affective_nyse:
+            broker = self.nyse_broker
+
+        resp = broker.create_market_buy_order(
             symbol=symbol,
             quantity=qty
         )
         if resp['msg1'] == "주문가능금액을 초과 했습니다":
             self.logger.log("시장가 매매 주문 가능 금액 부족으로 지정가 매수")
-            resp = self.broker.create_limit_buy_order(
+            resp = broker.create_limit_buy_order(
                 symbol = symbol,
                 price = price,
                 quantity = qty,
@@ -63,7 +97,11 @@ class ASPInvest:
         pprint.pprint(resp)
         time.sleep(1)
     def sell_order(self, symbol, qty):
-        resp = self.broker.create_market_sell_order(
+        broker = self.broker
+        if self.is_affective_nyse:
+            broker = self.nyse_broker
+        
+        resp = broker.create_market_sell_order(
             symbol=symbol,
             quantity=qty
         )
@@ -106,50 +144,56 @@ class ASPInvest:
         
     def create_logger(self, subtitle):
         self.logger = log.Logger(f"{self.config['NAME1']}, {self.config['NAME2']}", subtitle)
-    def __init__(self, key, api_secret, account_no, mock, settings, subtitle="", is_affective_nyse=True):
+    
+    def __init__(self, key, api_secret, account_no, mock, settings, is_affective_nyse, is_symbol_nyse,  subtitle=""):
         self.config = readini.read(settings)
         self.broker = mojito.KoreaInvestment(api_key=key, api_secret=api_secret, acc_no=account_no, mock=mock)
         self.nyse_broker = mojito.KoreaInvestment(api_key=key, api_secret=api_secret, acc_no=account_no, exchange='나스닥', mock=mock)
         self.agent = tf.keras.models.load_model(self.config['MODEL'])
-        self.yfsymbols = [self.config["CODE1"]+f".{self.config['TAG1']}", self.config["CODE2"]+f".{self.config['TAG2']}", self.config['AFFECTIVE']]
-        self.env = learn.ASPEnvironment(self.yfsymbols[0], self.yfsymbols[1], self.yfsymbols[2], stockdata.today_before(14, tz='Asia/Seoul'), stockdata.today(tz='Asia/Seoul'),"5m")
         self.is_affective_nyse = is_affective_nyse
+        self.is_symbol_nyse = is_symbol_nyse
+        if is_symbol_nyse:
+            self.yfsymbols = [self.config["CODE1"], self.config["CODE2"], self.config['AFFECTIVE']]
+        else:
+            self.yfsymbols = [self.config["CODE1"]+f".{self.config['TAG1']}", self.config["CODE2"]+f".{self.config['TAG2']}", self.config['AFFECTIVE']]
+
+        self.env = learn.ASPEnvironment(self.yfsymbols[0], self.yfsymbols[1], self.yfsymbols[2], stockdata.today_before(14, tz='Asia/Seoul'), stockdata.today(tz='Asia/Seoul'),"5m")
         self.logger = None
         self.trades = 0
         self.subtitle = subtitle
 
     def run(self):
-        resp = self.broker.fetch_balance()
-        stocks_qty = {}
-        for stock in resp['output1']:
-            stocks_qty[stock['pdno']] = int(stock['hldg_qty'])
-        prices = self._create_now_data([self.config["CODE1"], self.config["CODE2"]], self.config["AFFECTIVE"], self.is_affective_nyse)
+        
+        amount, stocks_qty, stocks_avgp = self.get_balance()
+        prices = self._create_now_data([self.config["CODE1"], self.config["CODE2"]], self.config["AFFECTIVE"], self.is_symbol_nyse ,self.is_affective_nyse)
         self.affective_entry_price = prices[2]
         self.symbol1_units = 0 if not self.config["CODE1"] in stocks_qty else stocks_qty[self.config["CODE1"]]
         self.symbol2_units = 0 if not self.config["CODE2"] in stocks_qty else stocks_qty[self.config["CODE2"]]
-        self.evaluate_amount = resp['output2'][0]['tot_evlu_amt']
-        self.current_amount = int(resp['output2'][0]['prvs_rcdl_excc_amt'])
+        self.current_amount = amount
+        
+        if not os.path.exists('invest log'):
+            os.makedirs('invest log')
         self.create_logger(subtitle=self.subtitle)
-        self.logger.log(f"평가 : {self.evaluate_amount}")
         self.logger.log(f"예수금 : {self.current_amount}")
         self.logger.log(f"보유 종목 : {self.config['NAME1']}({self.symbol1_units}), {self.config['NAME2']}({self.symbol2_units})")            
         self.logger.log(f"Affective System running {self.config['AFFECTIVE']} : {self.affective_entry_price}")
+        if self.is_symbol_nyse:
+            tz = pytz.timezone('America/New_York')
+        else:
+            tz = pytz.timezone('Asia/Seoul')
         while True:
-            now = datetime.now()
-
-            resp = self.broker.fetch_balance()
-            avgp = {self.config["CODE1"]:0, self.config["CODE2"]:0}
-            for stock in resp['output1']:
-                avgp[stock['pdno']] = float(stock['pchs_avg_pric'])
+            now = datetime.now(tz)
+            print(now)
+            amount, stocks_qty, stocks_avgp = self.get_balance()
             
-            prices = self._create_now_data([self.config["CODE1"], self.config["CODE2"]], self.config["AFFECTIVE"], self.is_affective_nyse)
+            prices = self._create_now_data([self.config["CODE1"], self.config["CODE2"]], self.config["AFFECTIVE"], self.is_symbol_nyse, self.is_affective_nyse)
             self.env.append_raw(self._create_standard_df(prices))
             state = self.reshape(np.array([self.env.get_last()]))
             symbol1_price = prices[0]
             symbol2_price = prices[1]
 
-            symbol1_loss = ((symbol1_price - avgp[self.config["CODE1"]]) / avgp[self.config["CODE1"]]) if avgp[self.config["CODE1"]] != 0 else 0
-            symbol2_loss = ((symbol2_price - avgp[self.config["CODE2"]]) / avgp[self.config["CODE2"]]) if avgp[self.config["CODE2"]] != 0 else 0
+            symbol1_loss = ((symbol1_price - stocks_avgp[self.config["CODE1"]]) / stocks_avgp[self.config["CODE1"]]) if stocks_avgp[self.config["CODE1"]] != 0 else 0
+            symbol2_loss = ((symbol2_price - stocks_avgp[self.config["CODE2"]]) / stocks_avgp[self.config["CODE2"]]) if stocks_avgp[self.config["CODE2"]] != 0 else 0
             affective_loss = ((prices[2] - self.affective_entry_price) / self.affective_entry_price) if self.affective_entry_price != 0 else 0
 
             #Affective System

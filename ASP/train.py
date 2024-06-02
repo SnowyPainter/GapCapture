@@ -5,7 +5,7 @@ import stockdata
 import learn
 import readini
 
-config = readini.read("./hanmi_sk_settings.ini")
+config = readini.read("./nepes_lx_settings.ini")
 symbol1 = config["CODE1"]+"."+config["TAG1"]
 symbol2 = config["CODE2"]+"."+config["TAG2"]
 affective = config["AFFECTIVE"]
