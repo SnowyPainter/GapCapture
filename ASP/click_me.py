@@ -1,5 +1,5 @@
 import os, configparser
-import ASP.asp_invest as asp_invest, nyse_train, run_backtest, train
+import asp_invest, nyse_train, run_backtest, train
 
 choices_list = ["해외주식 학습", "국내주식 학습", "백테스팅 하기", "실전투자 실행", "세팅 파일 만들기"]
 i = 1
@@ -52,6 +52,8 @@ if choice == 5: #세팅 파일 만들기
     }
     with open(f'{code1}_{code2}_settings.ini', 'w') as configfile:
         config.write(configfile)
+    print("세팅파일을 만들었습니다.")
+    exit()
 
 settings = input("세팅 파일의 위치를 입력해주세요 (예: ./sk_hanmi_settings.ini) : ")
 if choice == 1: #해외주식 학습
