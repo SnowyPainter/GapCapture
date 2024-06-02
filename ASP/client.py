@@ -36,7 +36,7 @@ config.read("./keys.ini")
 
 af_nyse = config['STOCK']['IsAffectiveNyse'] == 'yes'
 symbol_nyse = config['STOCK']['IsSymbolsNyse'] == 'yes'
-
+start_time = "21:30" if symbol_nyse else "09:00"
 strategy1 = invest.ASPInvest(config['ACCOUNT']['APIKEY'], config['ACCOUNT']['APISECRET'], config['ACCOUNT']['ACCNO'], False, config['SETTINGS']['PATH'], af_nyse, symbol_nyse,"실전투자")
 
 strategy1.run()
@@ -44,7 +44,7 @@ strategy1.run()
 print("This program run investing algorithm every 22:00")
 print("The log will be written at this directory.")
 
-schedule.every().day.at("09:00").do(strategy1.run)
+schedule.every().day.at(start_time).do(strategy1.run)
 
 while True:
     schedule.run_pending()

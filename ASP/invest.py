@@ -27,7 +27,7 @@ class ASPInvest:
     def _create_now_data(self, symbols, affective, is_symbols_nyse ,is_affective_nyse):
         prices = []
         if is_symbols_nyse and is_affective_nyse:
-            symbols = symbols.append(affective)
+            symbols.append(affective)
             for symbol in symbols:
                 resp = self.nyse_broker.fetch_price(symbol)
                 prices.append(float(resp['output']['last']))
@@ -47,7 +47,11 @@ class ASPInvest:
     
     def reshape(self, state):
         return np.reshape(state, [1, 1, 3])
-        
+    def is_market_closed(self, now):
+        if self.is_symbol_nyse:
+            return (now.hour <= 9 and now.minute <= 30) or now.hour >= 16
+        else:
+            return now.hour >= 15 and now.minute >= 30
     def get_amount_of_sell(self, curr_units):
         n = curr_units
         if n > self.config["SELL_AMOUNT"]:
@@ -63,7 +67,7 @@ class ASPInvest:
             broker = self.nyse_broker
             resp = broker.fetch_present_balance()
             print(resp)
-            amount = resp['output2']['frcr_dncl_amt_2']
+            amount = 0 #resp['output2']['frcr_dncl_amt_2']
             stocks_qty = {}
             avgp = {self.config["CODE1"]:0, self.config["CODE2"]:0}
             
@@ -180,6 +184,7 @@ class ASPInvest:
         while True:
             now = datetime.now(tz)
             print(now)
+            print(self.is_market_closed(now))
             amount, stocks_qty, stocks_avgp = self.get_balance()
             
             prices = self._create_now_data([self.config["CODE1"], self.config["CODE2"]], self.config["AFFECTIVE"], self.is_symbol_nyse, self.is_affective_nyse)
@@ -226,7 +231,7 @@ class ASPInvest:
                     else:
                         self.logger.log(f"No Money to buy {self.config['CODE2']} - {self.current_amount} / {symbol2_price}")
             
-            if now.hour >= 15 and now.minute >= 30:
+            if self.is_market_closed(now):
                 self.logger.log(f"End Trade, Trades:{self.trades}")
                 break
             else:
