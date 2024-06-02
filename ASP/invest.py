@@ -83,26 +83,22 @@ class ASPInvest:
         if self.is_affective_nyse:
             broker = self.nyse_broker
 
-        resp = broker.create_market_buy_order(
-            symbol=symbol,
-            quantity=qty
+        resp = broker.create_limit_buy_order(
+            symbol = symbol,
+            price = price,
+            quantity = qty,
         )
-        if resp['msg1'] == "주문가능금액을 초과 했습니다":
-            self.logger.log("시장가 매매 주문 가능 금액 부족으로 지정가 매수")
-            resp = broker.create_limit_buy_order(
-                symbol = symbol,
-                price = price,
-                quantity = qty,
-            )
+        
         pprint.pprint(resp)
         time.sleep(1)
-    def sell_order(self, symbol, qty):
+    def sell_order(self, symbol, qty, price):
         broker = self.broker
         if self.is_affective_nyse:
             broker = self.nyse_broker
         
-        resp = broker.create_market_sell_order(
+        resp = broker.create_limit_sell_order(
             symbol=symbol,
+            price=price,
             quantity=qty
         )
         pprint.pprint(resp)
@@ -120,7 +116,7 @@ class ASPInvest:
             units = self.get_amount_of_sell(self.symbol1_units)
         elif symbol == self.config["CODE2"]:
             units = self.get_amount_of_sell(self.symbol2_units)
-        self.sell_order(symbol, units)
+        self.sell_order(symbol, units, price)
         self.current_amount += units * price
         self.logger.log(f"시장가 매도 {symbol} - {units}, 예상 수익 : {loss}")
         self.trades += 1
