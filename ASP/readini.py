@@ -2,7 +2,7 @@ import configparser
 
 def read(fname):
     config = configparser.ConfigParser()
-    config.read(fname)
+    config.read(fname, encoding='utf-8')
     return {
         "AFFECTIVE" : config["AFFECTIVE"]["CODE"],
         "AF_BUY_THRESHOLD" : config["AFFECTIVE"].getfloat("BT"),

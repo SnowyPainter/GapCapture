@@ -7,11 +7,11 @@ for t in choices_list:
     print(f"{i}. {t}")
     i+=1
 
+print("세팅 파일이 없다면 먼저 만드신 후, 모델을 만들어주세요.")
+print("그 다음 모델의 주소를 세팅 파일의 [MODEL][PATH] 부분에 넣어주세요.")
+
 choice = int(input("번호를 입력해주세요 : "))
 if choice == 5: #세팅 파일 만들기
-    t = input("모델이 필요합니다. 모델명은 종목1종목2.keras 입니다. 있으십니까? (yes/no) : ")
-    if t != "yes":
-        exit()
     print("모델명을 알고계신가요? 학습시킨 후 models 폴더에 있습니다.")
     
     affective = input("참조할 종목 코드 : ")
