@@ -34,7 +34,7 @@ def main():
 
     #strategy1.run()
 
-    print("This program run investing algorithm every 22:00")
+    print(f"This program run investing algorithm every {start_time}")
     print("The log will be written at this directory.")
 
     schedule.every().day.at(start_time).do(strategy1.run)

@@ -47,7 +47,7 @@ class ASPInvest:
         return np.reshape(state, [1, 1, 3])
     def is_market_closed(self, now):
         if self.is_symbol_nyse:
-            return (now.hour <= 9 and now.minute <= 30) or now.hour >= 16
+            return now.hour >= 16
         else:
             return now.hour >= 15 and now.minute >= 30
     def get_amount_of_sell(self, curr_units):
