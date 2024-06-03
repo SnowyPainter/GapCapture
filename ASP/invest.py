@@ -24,6 +24,7 @@ class ASPInvest:
         return df
     def _create_now_data(self, symbols, affective, is_symbols_nyse ,is_affective_nyse):
         prices = []
+        affective = affective.upper()
         if is_symbols_nyse and is_affective_nyse:
             symbols.append(affective)
             for symbol in symbols:
@@ -94,6 +95,7 @@ class ASPInvest:
         
         pprint.pprint(resp)
         time.sleep(1)
+
     def sell_order(self, symbol, qty, price):
         broker = self.broker
         if self.is_affective_nyse:
@@ -106,6 +108,7 @@ class ASPInvest:
         )
         pprint.pprint(resp)
         time.sleep(1)
+
     def buy(self, units, symbol, price, af_price):
         self.buy_order(symbol, units, price)
         self.affective_entry_price += af_price
@@ -114,6 +117,7 @@ class ASPInvest:
         self.logger.log(f"매수 주문 {symbol} - {units} / {price}")
         self.trades += 1
         return units
+
     def sell(self, symbol, price, loss):
         if symbol == self.config["CODE1"]:
             units = self.get_amount_of_sell(self.symbol1_units)
