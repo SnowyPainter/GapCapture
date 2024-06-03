@@ -65,7 +65,7 @@ class ASPInvest:
         if self.is_symbol_nyse:
             broker = self.nyse_broker
             resp = broker.fetch_present_balance()
-            amount = 0 #resp['output2']['frcr_dncl_amt_2']
+            amount = float(resp['output2'][0]['frcr_dncl_amt_2'])
             stocks_qty = {}
             avgp = {self.config["CODE1"]:0, self.config["CODE2"]:0}
             for stock in resp['output1']:

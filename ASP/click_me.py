@@ -54,7 +54,9 @@ if choice == 5: #세팅 파일 만들기
         config.write(configfile)
     print("세팅파일을 만들었습니다.")
     exit()
-
+elif choice == 4: #실전투자
+    asp_invest.main()
+    
 settings = input("세팅 파일의 위치를 입력해주세요 (예: ./sk_hanmi_settings.ini) : ")
 if choice == 1: #해외주식 학습
     nyse_train.main(settings)
@@ -63,5 +65,3 @@ elif choice == 2: #국내주식 학습
 elif choice == 3: #백테스팅
     amount = int(input("소수 제외 초기 자본금을 입력해주세요. : "))
     run_backtest.main(settings, amount)
-elif choice == 4: #실전투자
-    asp_invest.main()
