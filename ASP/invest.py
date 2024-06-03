@@ -65,20 +65,22 @@ class ASPInvest:
             broker = self.nyse_broker
             resp = broker.fetch_present_balance()
             amount = 0 #resp['output2']['frcr_dncl_amt_2']
-            stocks_qty = {self.config["CODE1"]:0, self.config["CODE2"]:0}
+            stocks_qty = {}
             avgp = {self.config["CODE1"]:0, self.config["CODE2"]:0}
-            
+            for stock in resp['output1']:
+                stocks_qty[stock['pdno']] = int(float(stock['ccld_qty_smtl1']))
+                avgp[stock['pdno']] = float(stock['avg_unpr3'])
         else:
             broker = self.broker
             resp = broker.fetch_balance()
             amount = int(resp['output2'][0]['prvs_rcdl_excc_amt'])
             stocks_qty = {}
-            for stock in resp['output1']:
-                stocks_qty[stock['pdno']] = int(stock['hldg_qty'])
             avgp = {self.config["CODE1"]:0, self.config["CODE2"]:0}
             for stock in resp['output1']:
+                stocks_qty[stock['pdno']] = int(stock['hldg_qty'])
                 avgp[stock['pdno']] = float(stock['pchs_avg_pric'])
         return amount, stocks_qty, avgp
+
     def buy_order(self, symbol, qty, price): #market price
         broker = self.broker
         if self.is_affective_nyse:
