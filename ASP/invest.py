@@ -84,9 +84,12 @@ class ASPInvest:
 
     def buy_order(self, symbol, qty, price): #market price
         broker = self.broker
-        if self.is_affective_nyse:
+        if self.is_symbol_nyse:
             broker = self.nyse_broker
-
+        else:
+            price = str(int(price))
+            qty = str(qty)
+        
         resp = broker.create_limit_buy_order(
             symbol = symbol,
             price = price,
@@ -98,8 +101,11 @@ class ASPInvest:
 
     def sell_order(self, symbol, qty, price):
         broker = self.broker
-        if self.is_affective_nyse:
+        if self.is_symbol_nyse:
             broker = self.nyse_broker
+        else:
+            price = str(int(price))
+            qty = str(qty)
         
         resp = broker.create_limit_sell_order(
             symbol=symbol,
@@ -186,8 +192,6 @@ class ASPInvest:
             tz = pytz.timezone('Asia/Seoul')
         while True:
             now = datetime.now(tz)
-            print(now)
-            print(self.is_market_closed(now))
             amount, stocks_qty, stocks_avgp = self.get_balance()
             
             prices = self._create_now_data([self.config["CODE1"], self.config["CODE2"]], self.config["AFFECTIVE"], self.is_symbol_nyse, self.is_affective_nyse)
