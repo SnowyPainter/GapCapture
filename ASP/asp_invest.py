@@ -17,11 +17,6 @@ def is_market_open(nyse):
     else:
         return (now.hour == 9 and now.minute >= 0) or (9 < now.hour < 15) or (now.hour == 15 and now.minute <= 30)
 
-def task(strategy1, symbol_nyse):
-    now = datetime.now()
-    if is_market_open(symbol_nyse) or (symbol_nyse and now.hour < 22 or (now.hour == 22 and now.minute < 30)) or (not symbol_nyse and symbol_nyse and now.hour <= 9):
-        strategy1.run()
-
 def main():
     config = configparser.ConfigParser()
     if not os.path.exists('./keys.ini'):
@@ -47,13 +42,15 @@ def main():
 
     af_nyse = config['STOCK']['IsAffectiveNyse'] == 'yes'
     symbol_nyse = config['STOCK']['IsSymbolsNyse'] == 'yes'
+    start_time = "22:30" if symbol_nyse else "09:00"
     strategy1 = invest.ASPInvest(config['ACCOUNT']['APIKEY'], config['ACCOUNT']['APISECRET'], config['ACCOUNT']['ACCNO'], False, config['SETTINGS']['PATH'], af_nyse, symbol_nyse,"실전투자")
 
-    #strategy1.run()
-
+    if is_market_open(symbol_nyse):
+        strategy1.run()
+    
     print("The log will be written at this directory.")
 
-    schedule.every().minute.at(":30").do(task, strategy1, symbol_nyse)
+    schedule.every().day.at(start_time).do(strategy1.run)
 
     while True:
         schedule.run_pending()
