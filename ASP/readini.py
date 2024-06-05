@@ -19,4 +19,5 @@ def read(fname):
         "FEE" : config['SETTINGS'].getfloat('FEE'),
         "TAKE_PROFIT" : config['SETTINGS'].getfloat('TAKE_PROFIT'),
         "STOP_LOSS" : config['SETTINGS'].getfloat('STOP_LOSS'),
+        "TRADE_INTERVAL" : config['SETTINGS'].getint('TRADE_INTERVAL_SEC')
     }

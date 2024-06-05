@@ -167,6 +167,7 @@ class ASPInvest:
             self.yfsymbols = [self.config["CODE1"]+f".{self.config['TAG1']}", self.config["CODE2"]+f".{self.config['TAG2']}", self.config['AFFECTIVE']]
 
         self.env = learn.ASPEnvironment(self.yfsymbols[0], self.yfsymbols[1], self.yfsymbols[2], stockdata.today_before(14, tz='Asia/Seoul'), stockdata.today(tz='Asia/Seoul'),"5m")
+        self.trade_interval_sec = self.config["TRADE_INTERVAL"]
         self.logger = None
         self.trades = 0
         self.subtitle = subtitle
@@ -242,4 +243,4 @@ class ASPInvest:
                 self.logger.log(f"End Trade, Trades:{self.trades}")
                 break
             else:
-                time.sleep(60*5)
+                time.sleep(self.trade_interval_sec)

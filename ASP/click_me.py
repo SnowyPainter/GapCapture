@@ -48,7 +48,8 @@ if choice == 5: #세팅 파일 만들기
         "SYMBOL2_TAG": tag2,
         "FEE": 0.0025,
         "TAKE_PROFIT": tp,
-        "STOP_LOSS": sl
+        "STOP_LOSS": sl,
+        "TRADE_INTERVAL_SEC" : 3600
     }
     with open(f'{code1}_{code2}_settings.ini', 'w') as configfile:
         config.write(configfile)

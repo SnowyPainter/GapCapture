@@ -21,7 +21,8 @@ def main(settings, amount):
         print("쌍 매매하는 주식들은 같은 거래소 내에 있어야 합니다. 환전 문제")
         exit()
 
-    env = learn.ASPEnvironment(symbol1, symbol2, config["AFFECTIVE"], stockdata.today_before(50), stockdata.today(),"5m")
+    interval = input("일일 거래 주기를 설정하세요. (1h, 30m, 5m) : ")
+    env = learn.ASPEnvironment(symbol1, symbol2, config["AFFECTIVE"], stockdata.today_before(50), stockdata.today(), interval)
 
     stgy = backtest.Strategy1(env, amount, 0.0025, config["MODEL"])
     stgy.run()
