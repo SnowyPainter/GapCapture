@@ -54,7 +54,6 @@ if choice == 5: #세팅 파일 만들기
     with open(f'{code1}_{code2}_settings.ini', 'w') as configfile:
         config.write(configfile)
     print("세팅파일을 만들었습니다.")
-    exit()
 elif choice == 4: #실전투자
     asp_invest.main()
     

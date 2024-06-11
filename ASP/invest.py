@@ -11,6 +11,7 @@ import pandas as pd
 import log
 import readini
 import pytz, os
+import stockdata
 
 class ASPInvest:
     def _create_standard_df(self, prices):
@@ -28,20 +29,15 @@ class ASPInvest:
         if is_symbols_nyse and is_affective_nyse:
             symbols.append(affective)
             for symbol in symbols:
-                resp = self.nyse_broker.fetch_price(symbol)
-                prices.append(float(resp['output']['last']))
+                prices.append(float(stockdata.get_realtime_price(symbol)))
         elif not is_symbols_nyse and is_affective_nyse:
             for symbol in symbols:
-                resp = self.broker.fetch_price(symbol)
-                prices.append(float(resp['output']['stck_prpr']))    
-            resp = self.nyse_broker.fetch_price(affective)
-            prices.append(float(resp['output']['last']))
+                prices.append(float(stockdata.get_realtime_price(symbol)))
+            prices.append(float(stockdata.get_realtime_price(affective)))
         elif is_symbols_nyse and not is_affective_nyse:
             for symbol in symbols:
-                resp = self.nyse_broker.fetch_price(symbol)
-                prices.append(float(resp['output']['last']))
-            resp = self.broker.fetch_price(affective)
-            prices.append(float(resp['output']['stck_prpr']))
+                prices.append(float(stockdata.get_realtime_price(symbol)))
+            prices.append(float(stockdata.get_realtime_price(symbol)))
         return prices
     
     def reshape(self, state):
@@ -175,7 +171,7 @@ class ASPInvest:
     def run(self):
         
         amount, stocks_qty, stocks_avgp = self.get_balance()
-        prices = self._create_now_data([self.config["CODE1"], self.config["CODE2"]], self.config["AFFECTIVE"], self.is_symbol_nyse ,self.is_affective_nyse)
+        prices = self._create_now_data([self.config["CODE1"] + "." + self.config["TAG1"], self.config["CODE2"] + "." + self.config["TAG2"]], self.config["AFFECTIVE"], self.is_symbol_nyse ,self.is_affective_nyse)
         self.affective_entry_price = prices[2]
         self.symbol1_units = 0 if not self.config["CODE1"] in stocks_qty else stocks_qty[self.config["CODE1"]]
         self.symbol2_units = 0 if not self.config["CODE2"] in stocks_qty else stocks_qty[self.config["CODE2"]]
@@ -195,7 +191,7 @@ class ASPInvest:
             now = datetime.now(tz)
             amount, stocks_qty, stocks_avgp = self.get_balance()
             
-            prices = self._create_now_data([self.config["CODE1"], self.config["CODE2"]], self.config["AFFECTIVE"], self.is_symbol_nyse, self.is_affective_nyse)
+            prices = self._create_now_data([self.config["CODE1"] + "." + self.config["TAG1"], self.config["CODE2"] + "." + self.config["TAG2"]], self.config["AFFECTIVE"], self.is_symbol_nyse, self.is_affective_nyse)
             self.env.append_raw(self._create_standard_df(prices))
             state = self.reshape(np.array([self.env.get_last()]))
             symbol1_price = prices[0]

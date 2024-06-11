@@ -45,7 +45,7 @@ def main():
     start_time = "22:30" if symbol_nyse else "09:00"
     strategy1 = invest.ASPInvest(config['ACCOUNT']['APIKEY'], config['ACCOUNT']['APISECRET'], config['ACCOUNT']['ACCNO'], False, config['SETTINGS']['PATH'], af_nyse, symbol_nyse,"실전투자")
 
-    if is_market_open(symbol_nyse):
+    if True:#is_market_open(symbol_nyse):
         strategy1.run()
     
     print("The log will be written at this directory.")
